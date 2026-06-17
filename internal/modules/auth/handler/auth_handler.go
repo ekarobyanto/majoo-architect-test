@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
 	"github.com/user/go-backend-boilerplate/internal/platform/response"
 	"github.com/user/go-backend-boilerplate/internal/platform/validation"
-	"net/http"
 )
 
 type AuthHandler struct {
@@ -46,9 +47,4 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	return response.Success(c, http.StatusCreated, "Registration successful", resp)
-}
-
-func RegisterRoutes(router fiber.Router, h *AuthHandler) {
-	auth := router.Group("/auth")
-	auth.Post("/register", h.Register)
 }

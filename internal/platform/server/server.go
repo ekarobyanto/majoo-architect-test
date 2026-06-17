@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/user/go-backend-boilerplate/config"
 	authHandler "github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
+	healthHandler "github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 )
 
 // Server holds the fiber app and dependencies
@@ -17,7 +17,7 @@ type Server struct {
 	App           *fiber.App
 	Cfg           *config.Config
 	DB            *sqlx.DB
-	HealthHandler *handler.HealthHandler
+	HealthHandler *healthHandler.HealthHandler
 	AuthHandler   *authHandler.AuthHandler
 }
 
