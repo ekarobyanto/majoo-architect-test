@@ -70,6 +70,10 @@ seed:
 		PGPASSWORD=$(DB_PASSWORD) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f $$file; \
 	done
 
+## swagger: Generate swagger documentation
+swagger:
+	swag init -g cmd/api/main.go -o ./docs --parseDependency --parseInternal
+
 ## help: Show this help message
 help:
 	@echo "Usage: make [target]"

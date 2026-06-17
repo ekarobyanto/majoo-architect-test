@@ -16,7 +16,7 @@
 - Modify: `cmd/api/main.go`
 - Modify: `go.mod` (via `go get`)
 
-- [ ] **Step 1: Install dependencies**
+- [x] **Step 1: Install dependencies**
 
 Run:
 ```bash
@@ -24,7 +24,7 @@ go get github.com/gofiber/swagger
 go get github.com/swaggo/swag/cmd/swag
 ```
 
-- [ ] **Step 2: Add General API Annotations to main.go**
+- [x] **Step 2: Add General API Annotations to main.go**
 
 Modify `cmd/api/main.go` to include the following annotations before the `main()` function:
 
@@ -47,7 +47,7 @@ func main() {
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add go.mod go.sum cmd/api/main.go
