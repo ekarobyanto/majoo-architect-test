@@ -16,6 +16,9 @@ import (
 	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/service"
+	authHandler "github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
+	authRepo "github.com/user/go-backend-boilerplate/internal/modules/auth/repository"
+	authSvc "github.com/user/go-backend-boilerplate/internal/modules/auth/service"
 	"github.com/user/go-backend-boilerplate/internal/platform/errors"
 )
 
@@ -45,6 +48,11 @@ func NewServer(cfg *config.Config, db *sqlx.DB) *Server {
 	healthRepo := repository.NewHealthRepository(db)
 	healthSvc := service.NewHealthService(healthRepo)
 	handler.RegisterRoutes(app, healthSvc)
+
+	// Initialize Auth Module
+	aRepo := authRepo.NewAuthRepository(db)
+	aSvc := authSvc.NewAuthService(aRepo, cfg)
+	authHandler.RegisterRoutes(app, aSvc)
 
 	return &Server{
 		App: app,
