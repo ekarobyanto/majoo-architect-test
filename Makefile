@@ -72,7 +72,7 @@ seed:
 
 ## swagger: Generate swagger documentation
 swagger:
-	swag init -g cmd/api/main.go -o ./docs --parseDependency --parseInternal
+	swag init -g cmd/api/main.go -o ./docs/swagger --parseDependency --parseInternal
 
 ## help: Show this help message
 help:

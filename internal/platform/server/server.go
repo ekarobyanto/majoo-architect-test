@@ -11,7 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/user/go-backend-boilerplate/docs"
+	_ "github.com/user/go-backend-boilerplate/docs/swagger"
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"

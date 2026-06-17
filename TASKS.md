@@ -1,0 +1,29 @@
+# Blog System Implementation Tasks
+
+- [ ] Task 1: Authentication Module - Register
+    - [ ] Define interfaces/DTOs in `internal/modules/auth/domain`
+    - [ ] Implement Repository with user creation & role assignment
+    - [ ] Implement Service with business logic (uniqueness checks, password hashing)
+    - [ ] Implement Handler with validation
+    - [ ] Write Ginkgo tests (unit & integration)
+- [ ] Task 2: Authentication Module - Login
+    - [ ] Define Login DTOs
+    - [ ] Implement Service logic (verify password, load roles, generate JWT)
+    - [ ] Implement Handler
+    - [ ] Write tests
+- [ ] Task 3: Authentication Middleware
+    - [ ] Implement JWT Middleware in `internal/platform/server` or `internal/modules/auth/middleware`
+    - [ ] Inject user context (ID, roles) into Fiber context
+- [ ] Task 4: Authorization
+    - [ ] Implement ownership and role-based checks for Posts and Comments
+- [ ] Task 5: Posts Module
+    - [ ] Implement CRUD with pagination
+    - [ ] Integrate Authorization
+    - [ ] Write tests
+- [ ] Task 6: Comments Module
+    - [ ] Implement CRUD
+    - [ ] Integrate Authorization
+    - [ ] Write tests
+- [ ] Task 7: Final Error Handling & Routing
+    - [ ] Centralized error handling
+    - [ ] Verify all endpoints match spec
