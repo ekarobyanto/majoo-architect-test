@@ -43,10 +43,15 @@ func TestHealthHandler_CheckHealth(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
-	var actualResponse domain.HealthResponse
+	var fullResp struct {
+		Success bool                  `json:"success"`
+		Message string                `json:"message"`
+		Data    domain.HealthResponse `json:"data"`
+	}
 	body, _ := io.ReadAll(resp.Body)
-	json.Unmarshal(body, &actualResponse)
+	json.Unmarshal(body, &fullResp)
 
-	assert.Equal(t, expectedResponse, actualResponse)
+	assert.True(t, fullResp.Success)
+	assert.Equal(t, expectedResponse, fullResp.Data)
 	mockSvc.AssertExpectations(t)
 }

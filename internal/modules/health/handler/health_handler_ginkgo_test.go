@@ -45,13 +45,18 @@ var _ = Describe("HealthHandler", func() {
 
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				var actualResponse domain.HealthResponse
+				var fullResp struct {
+					Success bool                  `json:"success"`
+					Message string                `json:"message"`
+					Data    domain.HealthResponse `json:"data"`
+				}
 				body, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				err = json.Unmarshal(body, &actualResponse)
+				err = json.Unmarshal(body, &fullResp)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(actualResponse).To(Equal(expectedResponse))
+				Expect(fullResp.Success).To(BeTrue())
+				Expect(fullResp.Data).To(Equal(expectedResponse))
 				mockSvc.AssertExpectations(GinkgoT())
 			})
 		})
@@ -71,13 +76,18 @@ var _ = Describe("HealthHandler", func() {
 
 				Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
 
-				var actualResponse domain.HealthResponse
+				var fullResp struct {
+					Success bool                  `json:"success"`
+					Message string                `json:"message"`
+					Data    domain.HealthResponse `json:"data"`
+				}
 				body, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				err = json.Unmarshal(body, &actualResponse)
+				err = json.Unmarshal(body, &fullResp)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(actualResponse).To(Equal(expectedResponse))
+				Expect(fullResp.Success).To(BeFalse())
+				Expect(fullResp.Data).To(Equal(expectedResponse))
 				mockSvc.AssertExpectations(GinkgoT())
 			})
 		})

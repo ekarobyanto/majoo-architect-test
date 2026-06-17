@@ -17,10 +17,10 @@ import (
 
 var _ = Describe("Health Integration", func() {
 	var (
-		cfg    *config.Config
-		db     *sqlx.DB
-		mock   sqlmock.Sqlmock
-		srv    *server.Server
+		cfg  *config.Config
+		db   *sqlx.DB
+		mock sqlmock.Sqlmock
+		srv  *server.Server
 	)
 
 	BeforeEach(func() {
@@ -32,7 +32,7 @@ var _ = Describe("Health Integration", func() {
 		// Mock database
 		dbRaw, mockRaw, err := sqlmock.New(sqlmock.MonitorPingsOption(true))
 		Expect(err).NotTo(HaveOccurred())
-		
+
 		db = sqlx.NewDb(dbRaw, "postgres")
 		mock = mockRaw
 
@@ -55,15 +55,20 @@ var _ = Describe("Health Integration", func() {
 
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
-				var healthResp domain.HealthResponse
+				var fullResp struct {
+					Success bool                  `json:"success"`
+					Message string                `json:"message"`
+					Data    domain.HealthResponse `json:"data"`
+				}
 				body, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				err = json.Unmarshal(body, &healthResp)
+				err = json.Unmarshal(body, &fullResp)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(healthResp.Status).To(Equal("UP"))
-				Expect(healthResp.Message).To(ContainSubstring("healthy"))
-				
+				Expect(fullResp.Success).To(BeTrue())
+				Expect(fullResp.Data.Status).To(Equal("UP"))
+				Expect(fullResp.Data.Message).To(ContainSubstring("healthy"))
+
 				Expect(mock.ExpectationsWereMet()).To(Succeed())
 			})
 		})
@@ -78,15 +83,20 @@ var _ = Describe("Health Integration", func() {
 
 				Expect(resp.StatusCode).To(Equal(http.StatusServiceUnavailable))
 
-				var healthResp domain.HealthResponse
+				var fullResp struct {
+					Success bool                  `json:"success"`
+					Message string                `json:"message"`
+					Data    domain.HealthResponse `json:"data"`
+				}
 				body, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				err = json.Unmarshal(body, &healthResp)
+				err = json.Unmarshal(body, &fullResp)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(healthResp.Status).To(Equal("DOWN"))
-				Expect(healthResp.Message).To(ContainSubstring("failed"))
-				
+				Expect(fullResp.Success).To(BeFalse())
+				Expect(fullResp.Data.Status).To(Equal("DOWN"))
+				Expect(fullResp.Data.Message).To(ContainSubstring("failed"))
+
 				Expect(mock.ExpectationsWereMet()).To(Succeed())
 			})
 		})

@@ -16,6 +16,7 @@ import (
 	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/service"
+	"github.com/user/go-backend-boilerplate/internal/platform/errors"
 )
 
 // Server holds the fiber app and dependencies
@@ -28,7 +29,8 @@ type Server struct {
 // NewServer initializes a new fiber server with basic middlewares
 func NewServer(cfg *config.Config, db *sqlx.DB) *Server {
 	app := fiber.New(fiber.Config{
-		AppName: "Go Backend Boilerplate",
+		AppName:      "Go Backend Boilerplate",
+		ErrorHandler: errors.GlobalErrorHandler,
 	})
 
 	// Middlewares

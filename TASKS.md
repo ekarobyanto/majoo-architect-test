@@ -7,7 +7,7 @@
   * [ ] Define error codes
   * [ ] Implement global error handler
   * [ ] Define validation error response format
-  * [ ] Define common response helpers
+* [ ] Define common response helpers
   * [ ] Generate documentation
 
 * [ ] Task 1: Authentication Module - Register

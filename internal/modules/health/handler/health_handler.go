@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/domain"
+	"github.com/user/go-backend-boilerplate/internal/platform/response"
+	"net/http"
 )
 
 type HealthHandler struct {
@@ -26,10 +28,10 @@ func NewHealthHandler(svc domain.HealthService) *HealthHandler {
 func (h *HealthHandler) CheckHealth(c *fiber.Ctx) error {
 	resp, err := h.svc.Check(c.Context())
 	if err != nil {
-		return c.Status(fiber.StatusServiceUnavailable).JSON(resp)
+		return response.JSON(c, http.StatusServiceUnavailable, "Service Unavailable", resp)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(resp)
+	return response.Success(c, http.StatusOK, "Health check success", resp)
 }
 
 func RegisterRoutes(router fiber.Router, svc domain.HealthService) {
