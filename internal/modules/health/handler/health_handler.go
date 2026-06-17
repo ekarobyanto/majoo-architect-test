@@ -15,6 +15,14 @@ func NewHealthHandler(svc domain.HealthService) *HealthHandler {
 	}
 }
 
+// CheckHealth godoc
+// @Summary Check service health
+// @Description Get the status of the service and database
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} domain.HealthResponse
+// @Router /health [get]
 func (h *HealthHandler) CheckHealth(c *fiber.Ctx) error {
 	resp, err := h.svc.Check(c.Context())
 	if err != nil {
