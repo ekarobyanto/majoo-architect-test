@@ -48,9 +48,7 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	return response.Success(c, http.StatusCreated, "Registration successful", resp)
 }
 
-func RegisterRoutes(router fiber.Router, svc domain.AuthService) {
-	h := NewAuthHandler(svc)
-	
+func RegisterRoutes(router fiber.Router, h *AuthHandler) {
 	auth := router.Group("/auth")
 	auth.Post("/register", h.Register)
 }

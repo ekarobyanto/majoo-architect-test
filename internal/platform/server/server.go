@@ -6,59 +6,19 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/gofiber/swagger"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/user/go-backend-boilerplate/docs/swagger"
 	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/service"
 	authHandler "github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
-	authRepo "github.com/user/go-backend-boilerplate/internal/modules/auth/repository"
-	authSvc "github.com/user/go-backend-boilerplate/internal/modules/auth/service"
-	"github.com/user/go-backend-boilerplate/internal/platform/errors"
+	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 )
 
 // Server holds the fiber app and dependencies
 type Server struct {
-	App *fiber.App
-	Cfg *config.Config
-	DB  *sqlx.DB
-}
-
-// NewServer initializes a new fiber server with basic middlewares
-func NewServer(cfg *config.Config, db *sqlx.DB) *Server {
-	app := fiber.New(fiber.Config{
-		AppName:      "Go Backend Boilerplate",
-		ErrorHandler: errors.GlobalErrorHandler,
-	})
-
-	// Middlewares
-	app.Use(recover.New())
-	app.Use(logger.New())
-	app.Use(cors.New())
-
-	// Swagger
-	app.Get("/swagger/*", swagger.HandlerDefault)
-
-	// Initialize Health Module
-	healthRepo := repository.NewHealthRepository(db)
-	healthSvc := service.NewHealthService(healthRepo)
-	handler.RegisterRoutes(app, healthSvc)
-
-	// Initialize Auth Module
-	aRepo := authRepo.NewAuthRepository(db)
-	aSvc := authSvc.NewAuthService(aRepo, cfg)
-	authHandler.RegisterRoutes(app, aSvc)
-
-	return &Server{
-		App: app,
-		Cfg: cfg,
-		DB:  db,
-	}
+	App           *fiber.App
+	Cfg           *config.Config
+	DB            *sqlx.DB
+	HealthHandler *handler.HealthHandler
+	AuthHandler   *authHandler.AuthHandler
 }
 
 // Start starts the fiber server

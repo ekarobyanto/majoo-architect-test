@@ -11,7 +11,7 @@ import (
 
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/internal/platform/server"
+	"github.com/user/go-backend-boilerplate/internal/platform/di"
 )
 
 // @title Blog System API
@@ -53,7 +53,7 @@ func run() error {
 	}()
 
 	// 3. Initialize Server
-	srv := server.NewServer(cfg, db)
+	srv := di.InitializeServer(cfg, db)
 
 	// 4. Start Server
 	errChan := make(chan error, 1)

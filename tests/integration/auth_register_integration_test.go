@@ -14,6 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
+	"github.com/user/go-backend-boilerplate/internal/platform/di"
 	"github.com/user/go-backend-boilerplate/internal/platform/server"
 )
 
@@ -30,7 +31,7 @@ var _ = Describe("Auth Register Integration", func() {
 		dbRaw, mockRaw, _ := sqlmock.New()
 		db = sqlx.NewDb(dbRaw, "postgres")
 		mock = mockRaw
-		srv = server.NewServer(cfg, db)
+		srv = di.InitializeServer(cfg, db)
 	})
 
 	AfterEach(func() {

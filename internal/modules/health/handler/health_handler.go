@@ -34,7 +34,6 @@ func (h *HealthHandler) CheckHealth(c *fiber.Ctx) error {
 	return response.Success(c, http.StatusOK, "Health check success", resp)
 }
 
-func RegisterRoutes(router fiber.Router, svc domain.HealthService) {
-	h := NewHealthHandler(svc)
+func RegisterRoutes(router fiber.Router, h *HealthHandler) {
 	router.Get("/health", h.CheckHealth)
 }
