@@ -9,7 +9,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/user/go-backend-boilerplate/docs"
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
@@ -33,6 +35,9 @@ func NewServer(cfg *config.Config, db *sqlx.DB) *Server {
 	app.Use(recover.New())
 	app.Use(logger.New())
 	app.Use(cors.New())
+
+	// Swagger
+	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	// Initialize Health Module
 	healthRepo := repository.NewHealthRepository(db)
