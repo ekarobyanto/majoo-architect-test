@@ -8,15 +8,15 @@ package di
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/user/go-backend-boilerplate/config"
-	handler2 "github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
-	repository2 "github.com/user/go-backend-boilerplate/internal/modules/auth/repository"
-	service2 "github.com/user/go-backend-boilerplate/internal/modules/auth/service"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/service"
-	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/internal/platform/server"
+	"github.com/user/simple-blog/config"
+	handler2 "github.com/user/simple-blog/internal/modules/auth/handler"
+	repository2 "github.com/user/simple-blog/internal/modules/auth/repository"
+	service2 "github.com/user/simple-blog/internal/modules/auth/service"
+	"github.com/user/simple-blog/internal/modules/health/handler"
+	"github.com/user/simple-blog/internal/modules/health/repository"
+	"github.com/user/simple-blog/internal/modules/health/service"
+	"github.com/user/simple-blog/internal/platform/database"
+	"github.com/user/simple-blog/internal/platform/server"
 )
 
 // Injectors from wire.go:

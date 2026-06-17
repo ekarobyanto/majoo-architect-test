@@ -38,3 +38,7 @@ database/seeds/*.sql
 
 # Logs
 *.log
+
+# Test coverage
+coverage.out
+coverage.html

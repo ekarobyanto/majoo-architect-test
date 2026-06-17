@@ -1,4 +1,4 @@
-# Go Backend Boilerplate
+# Simple Blog
 
 A production-ready Go backend boilerplate using a modular (feature-based) architecture, designed for performance, maintainability, and ease of use.
 

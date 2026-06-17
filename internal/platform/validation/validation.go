@@ -2,7 +2,7 @@ package validation
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/user/go-backend-boilerplate/internal/platform/errors"
+	"github.com/user/simple-blog/internal/platform/errors"
 )
 
 var validate = validator.New()

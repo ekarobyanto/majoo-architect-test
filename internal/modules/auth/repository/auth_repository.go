@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"github.com/jmoiron/sqlx"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/models"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/platform/database"
+	"github.com/user/simple-blog/models"
 )
 
 type authRepository struct {

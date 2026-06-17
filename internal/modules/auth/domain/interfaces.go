@@ -2,7 +2,7 @@ package domain
 
 import (
 	"context"
-	"github.com/user/go-backend-boilerplate/models"
+	"github.com/user/simple-blog/models"
 )
 
 type AuthRepository interface {

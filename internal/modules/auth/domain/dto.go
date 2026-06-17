@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/user/go-backend-boilerplate/models"
+	"github.com/user/simple-blog/models"
 )
 
 type RegisterRequest struct {

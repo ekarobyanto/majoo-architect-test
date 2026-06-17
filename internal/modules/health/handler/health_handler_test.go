@@ -11,8 +11,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/domain"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
+	"github.com/user/simple-blog/internal/modules/health/domain"
+	"github.com/user/simple-blog/internal/modules/health/handler"
 )
 
 type mockHealthService struct {

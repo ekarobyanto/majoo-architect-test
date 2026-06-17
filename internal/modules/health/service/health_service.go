@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/user/go-backend-boilerplate/internal/modules/health/domain"
+	"github.com/user/simple-blog/internal/modules/health/domain"
 )
 
 type healthService struct {

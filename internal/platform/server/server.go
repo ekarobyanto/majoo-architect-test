@@ -7,9 +7,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
-	"github.com/user/go-backend-boilerplate/config"
-	authHandler "github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
-	healthHandler "github.com/user/go-backend-boilerplate/internal/modules/health/handler"
+	"github.com/user/simple-blog/config"
+	authHandler "github.com/user/simple-blog/internal/modules/auth/handler"
+	healthHandler "github.com/user/simple-blog/internal/modules/health/handler"
 )
 
 // Server holds the fiber app and dependencies

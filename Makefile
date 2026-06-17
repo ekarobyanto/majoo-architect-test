@@ -35,6 +35,23 @@ test:
 ginkgo:
 	@ginkgo ./...
 
+## test-coverage: Run tests with coverage and show summary
+test-coverage:
+	@go test -coverprofile=coverage.out ./... || true
+	@if [ -f coverage.out ]; then \
+		go tool cover -func=coverage.out; \
+		rm coverage.out; \
+	fi
+
+## test-coverage-html: Run tests with coverage and generate HTML report
+test-coverage-html:
+	@go test -coverprofile=coverage.out ./... || true
+	@if [ -f coverage.out ]; then \
+		go tool cover -html=coverage.out -o coverage.html; \
+		rm coverage.out; \
+		echo "Coverage report generated at coverage.html"; \
+	fi
+
 ## deps: Download and tidy dependencies
 deps:
 	@go mod download
@@ -79,4 +96,4 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^## .*' $(MAKEFILE_LIST) | sed 's/^## //' | sort | awk 'BEGIN {FS = ": "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'

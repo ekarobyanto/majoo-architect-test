@@ -12,10 +12,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/platform/di"
-	"github.com/user/go-backend-boilerplate/internal/platform/server"
+	"github.com/user/simple-blog/config"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/platform/di"
+	"github.com/user/simple-blog/internal/platform/server"
 )
 
 var _ = Describe("Auth Register Integration", func() {

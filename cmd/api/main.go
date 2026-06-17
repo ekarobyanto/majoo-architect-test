@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/internal/platform/di"
+	"github.com/user/simple-blog/config"
+	"github.com/user/simple-blog/internal/platform/database"
+	"github.com/user/simple-blog/internal/platform/di"
 )
 
 // @title Blog System API

@@ -2,14 +2,15 @@ package service_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/service"
-	"github.com/user/go-backend-boilerplate/models"
+	"github.com/user/simple-blog/config"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/modules/auth/service"
+	"github.com/user/simple-blog/models"
 )
 
 type mockAuthRepository struct {
@@ -111,4 +112,190 @@ func TestAuthService_Register_UsernameConflict(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "Username already taken")
+}
+
+func TestAuthService_Register_EmailConflict(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "existing@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(&models.User{Email: "existing@example.com"}, nil)
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "Email already registered")
+}
+
+func TestAuthService_Register_RoleNotFound(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, nil)
+	repo.On("GetRoleByName", ctx, "user").Return(nil, nil)
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "Default role not found")
+}
+
+func TestAuthService_Register_CreateUserError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, nil)
+	repo.On("GetRoleByName", ctx, "user").Return(&models.Role{ID: "role-id", Name: "user"}, nil)
+	repo.On("CreateUser", ctx, mock.AnythingOfType("*models.User")).Return(fmt.Errorf("db error"))
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Register_AssignRoleError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, nil)
+	repo.On("GetRoleByName", ctx, "user").Return(&models.Role{ID: "role-id", Name: "user"}, nil)
+	repo.On("CreateUser", ctx, mock.AnythingOfType("*models.User")).Return(nil)
+	repo.On("AssignRole", ctx, mock.AnythingOfType("string"), "role-id").Return(fmt.Errorf("db error"))
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Register_GetByUsernameError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, fmt.Errorf("db error"))
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Register_GetByEmailError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, fmt.Errorf("db error"))
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Register_GetRoleByNameError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.RegisterRequest{
+		Username: "testuser",
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByUsername", ctx, req.Username).Return(nil, nil)
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, nil)
+	repo.On("GetRoleByName", ctx, "user").Return(nil, fmt.Errorf("db error"))
+
+	resp, err := svc.Register(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Login_NotImplemented(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.LoginRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	resp, err := svc.Login(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "not implemented", err.Error())
 }

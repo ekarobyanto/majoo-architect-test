@@ -40,7 +40,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_user_go-backend-boilerplate_internal_modules_health_domain.HealthResponse"
+                            "$ref": "#/definitions/github_com_user_simple-blog_internal_modules_health_domain.HealthResponse"
                         }
                     }
                 }
@@ -48,7 +48,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_user_go-backend-boilerplate_internal_modules_health_domain.HealthResponse": {
+        "github_com_user_simple-blog_internal_modules_health_domain.HealthResponse": {
             "type": "object",
             "properties": {
                 "message": {

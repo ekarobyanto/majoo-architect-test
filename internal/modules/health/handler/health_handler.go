@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/domain"
-	"github.com/user/go-backend-boilerplate/internal/platform/response"
+	"github.com/user/simple-blog/internal/modules/health/domain"
+	"github.com/user/simple-blog/internal/platform/response"
 	"net/http"
 )
 

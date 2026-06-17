@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/user/go-backend-boilerplate/internal/modules/health/domain"
+	"github.com/user/simple-blog/internal/modules/health/domain"
 )
 
 type healthRepository struct {

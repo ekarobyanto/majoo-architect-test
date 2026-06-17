@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/internal/platform/errors"
-	"github.com/user/go-backend-boilerplate/models"
+	"github.com/user/simple-blog/config"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/platform/database"
+	"github.com/user/simple-blog/internal/platform/errors"
+	"github.com/user/simple-blog/models"
 	"golang.org/x/crypto/bcrypt"
 )
 

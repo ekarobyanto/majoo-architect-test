@@ -6,11 +6,11 @@ package di
 import (
 	"github.com/google/wire"
 	"github.com/jmoiron/sqlx"
-	"github.com/user/go-backend-boilerplate/config"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth"
-	"github.com/user/go-backend-boilerplate/internal/modules/health"
-	"github.com/user/go-backend-boilerplate/internal/platform/database"
-	"github.com/user/go-backend-boilerplate/internal/platform/server"
+	"github.com/user/simple-blog/config"
+	"github.com/user/simple-blog/internal/modules/auth"
+	"github.com/user/simple-blog/internal/modules/health"
+	"github.com/user/simple-blog/internal/platform/database"
+	"github.com/user/simple-blog/internal/platform/server"
 )
 
 func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {

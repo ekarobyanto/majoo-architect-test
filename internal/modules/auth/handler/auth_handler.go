@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/platform/response"
-	"github.com/user/go-backend-boilerplate/internal/platform/validation"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/platform/response"
+	"github.com/user/simple-blog/internal/platform/validation"
 )
 
 type AuthHandler struct {

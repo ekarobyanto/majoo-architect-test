@@ -100,7 +100,7 @@ Update imports in `internal/platform/server/server.go`:
 ```go
 import (
     "github.com/gofiber/swagger"
-    _ "github.com/user/go-backend-boilerplate/docs" // Import generated docs
+    _ "github.com/user/simple-blog/docs" // Import generated docs
     // ... existing imports
 )
 ```

@@ -12,9 +12,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
-	"github.com/user/go-backend-boilerplate/internal/modules/auth/handler"
-	"github.com/user/go-backend-boilerplate/internal/platform/errors"
+	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/modules/auth/handler"
+	"github.com/user/simple-blog/internal/platform/errors"
 )
 
 type mockAuthService struct {

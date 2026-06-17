@@ -1,4 +1,4 @@
-module github.com/user/go-backend-boilerplate
+module github.com/user/simple-blog
 
 go 1.25.0
 

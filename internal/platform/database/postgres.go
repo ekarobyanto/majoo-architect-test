@@ -6,8 +6,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/user/go-backend-boilerplate/config"
+	"github.com/user/simple-blog/config"
 )
+
+var openDB = sqlx.Open
 
 // NewConnection initializes a new PostgreSQL connection using sqlx
 func NewConnection(cfg *config.Config) (*sqlx.DB, error) {
@@ -16,7 +18,7 @@ func NewConnection(cfg *config.Config) (*sqlx.DB, error) {
 		cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name, cfg.DB.SSLMode,
 	)
 
-	db, err := sqlx.Connect("postgres", dsn)
+	db, err := openDB("postgres", dsn)
 	if err != nil {
 		return nil, err
 	}
@@ -25,6 +27,11 @@ func NewConnection(cfg *config.Config) (*sqlx.DB, error) {
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(5 * time.Minute)
+
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
 
 	return db, nil
 }
