@@ -15,6 +15,7 @@ import (
 	"github.com/user/go-backend-boilerplate/internal/modules/health/handler"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/repository"
 	"github.com/user/go-backend-boilerplate/internal/modules/health/service"
+	"github.com/user/go-backend-boilerplate/internal/platform/database"
 	"github.com/user/go-backend-boilerplate/internal/platform/server"
 )
 
@@ -25,7 +26,8 @@ func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {
 	healthService := service.NewHealthService(healthRepository)
 	healthHandler := handler.NewHealthHandler(healthService)
 	authRepository := repository2.NewAuthRepository(db)
-	authService := service2.NewAuthService(authRepository, cfg)
+	transactor := database.NewTransactor(db)
+	authService := service2.NewAuthService(authRepository, cfg, transactor)
 	authHandler := handler2.NewAuthHandler(authService)
 	serverServer := server.NewServer(cfg, db, healthHandler, authHandler)
 	return serverServer

@@ -9,6 +9,7 @@ import (
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/modules/auth"
 	"github.com/user/go-backend-boilerplate/internal/modules/health"
+	"github.com/user/go-backend-boilerplate/internal/platform/database"
 	"github.com/user/go-backend-boilerplate/internal/platform/server"
 )
 
@@ -16,6 +17,7 @@ func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {
 	wire.Build(
 		health.ProviderSet,
 		auth.ProviderSet,
+		database.NewTransactor,
 		server.NewServer,
 	)
 	return nil

@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/user/go-backend-boilerplate/config"
 	"github.com/user/go-backend-boilerplate/internal/modules/auth/domain"
+	"github.com/user/go-backend-boilerplate/internal/platform/database"
 	"github.com/user/go-backend-boilerplate/internal/platform/errors"
 	"github.com/user/go-backend-boilerplate/models"
 	"golang.org/x/crypto/bcrypt"
@@ -14,12 +15,18 @@ import (
 type authService struct {
 	repo domain.AuthRepository
 	cfg  *config.Config
+	tx   database.Transactor
 }
 
-func NewAuthService(repo domain.AuthRepository, cfg *config.Config) domain.AuthService {
+func NewAuthService(
+	repo domain.AuthRepository,
+	cfg *config.Config,
+	tx database.Transactor,
+) domain.AuthService {
 	return &authService{
 		repo: repo,
 		cfg:  cfg,
+		tx:   tx,
 	}
 }
 
@@ -65,13 +72,20 @@ func (s *authService) Register(ctx context.Context, req domain.RegisterRequest) 
 		PasswordHash: string(hashedPassword),
 	}
 
-	err = s.repo.CreateUser(ctx, user)
-	if err != nil {
-		return nil, err
-	}
+	err = s.tx.WithinTransaction(ctx, func(txCtx context.Context) error {
+		err = s.repo.CreateUser(txCtx, user)
+		if err != nil {
+			return err
+		}
 
-	// Assign role
-	err = s.repo.AssignRole(ctx, user.ID, role.ID)
+		// Assign role
+		err = s.repo.AssignRole(txCtx, user.ID, role.ID)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +98,5 @@ func (s *authService) Register(ctx context.Context, req domain.RegisterRequest) 
 }
 
 func (s *authService) Login(ctx context.Context, req domain.LoginRequest) (*domain.LoginResponse, error) {
-	// Implementation for login will follow in Task 2
 	return nil, fmt.Errorf("not implemented")
 }

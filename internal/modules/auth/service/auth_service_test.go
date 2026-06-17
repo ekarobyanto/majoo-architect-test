@@ -16,6 +16,14 @@ type mockAuthRepository struct {
 	mock.Mock
 }
 
+type mockTransactor struct {
+	mock.Mock
+}
+
+func (m *mockTransactor) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	return fn(ctx)
+}
+
 func (m *mockAuthRepository) CreateUser(ctx context.Context, user *models.User) error {
 	args := m.Called(ctx, user)
 	return args.Error(0)
@@ -57,8 +65,9 @@ func (m *mockAuthRepository) GetUserRoles(ctx context.Context, userID string) ([
 
 func TestAuthService_Register(t *testing.T) {
 	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
 	cfg := &config.Config{}
-	svc := service.NewAuthService(repo, cfg)
+	svc := service.NewAuthService(repo, cfg, tx)
 
 	ctx := context.Background()
 	req := domain.RegisterRequest{
@@ -84,8 +93,9 @@ func TestAuthService_Register(t *testing.T) {
 
 func TestAuthService_Register_UsernameConflict(t *testing.T) {
 	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
 	cfg := &config.Config{}
-	svc := service.NewAuthService(repo, cfg)
+	svc := service.NewAuthService(repo, cfg, tx)
 
 	ctx := context.Background()
 	req := domain.RegisterRequest{

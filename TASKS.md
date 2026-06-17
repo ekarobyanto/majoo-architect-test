@@ -10,29 +10,29 @@
 * [ ] Define common response helpers
   * [ ] Generate documentation
 
-* [ ] Task 1: Authentication Module - Register
+* [x] Task 1: Authentication Module - Register
 
-  * [ ] Define interfaces and DTOs in `internal/modules/auth/domain`
-  * [ ] Implement Repository
+  * [x] Define interfaces and DTOs in `internal/modules/auth/domain`
+  * [x] Implement Repository
 
-    * [ ] Create user
-    * [ ] Get role by name
-    * [ ] Assign role to user
-    * [ ] Check username existence
-    * [ ] Check email existence
-  * [ ] Implement Service
+    * [x] Create user
+    * [x] Get role by name
+    * [x] Assign role to user
+    * [x] Check username existence
+    * [x] Check email existence
+  * [x] Implement Service
 
-    * [ ] Validate uniqueness
-    * [ ] Hash password
-    * [ ] Create user transaction
-    * [ ] Assign default role
-  * [ ] Implement Handler
-  * [ ] Add request validation
-  * [ ] Write Ginkgo tests
+    * [x] Validate uniqueness
+    * [x] Hash password
+    * [x] Create user transaction
+    * [x] Assign default role
+  * [x] Implement Handler
+  * [x] Add request validation
+  * [x] Write Ginkgo tests
 
-    * [ ] Unit tests
-    * [ ] Integration tests
-  * [ ] Generate documentation
+    * [x] Unit tests
+    * [x] Integration tests
+  * [x] Generate documentation
 
 * [ ] Task 2: Authentication Module - Login
 

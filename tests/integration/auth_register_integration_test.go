@@ -61,6 +61,9 @@ var _ = Describe("Auth Register Integration", func() {
 				WithArgs("user").
 				WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow("role-uuid", "user"))
 
+			// Transaction starts here
+			mock.ExpectBegin()
+
 			// Mock CreateUser
 			now := time.Now()
 			mock.ExpectQuery("INSERT INTO users").
@@ -70,6 +73,8 @@ var _ = Describe("Auth Register Integration", func() {
 			mock.ExpectExec("INSERT INTO user_roles").
 				WithArgs(sqlmock.AnyArg(), "role-uuid").
 				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			mock.ExpectCommit()
 
 			body, _ := json.Marshal(reqBody)
 			req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewReader(body))
