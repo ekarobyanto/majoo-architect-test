@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+
 	authDomain "github.com/user/simple-blog/internal/modules/auth/domain"
 	"github.com/user/simple-blog/models"
 )

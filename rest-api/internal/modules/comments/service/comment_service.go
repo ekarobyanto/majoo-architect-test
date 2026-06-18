@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/user/simple-blog/internal/modules/auth/authorization"
 	authDomain "github.com/user/simple-blog/internal/modules/auth/domain"
-	"github.com/user/simple-blog/internal/modules/auth/middleware"
 	"github.com/user/simple-blog/internal/modules/comments/domain"
 	postsDomain "github.com/user/simple-blog/internal/modules/posts/domain"
 	"github.com/user/simple-blog/internal/platform/errors"
@@ -51,7 +51,7 @@ func (s *commentService) Update(ctx context.Context, id string, user *authDomain
 		return nil, errors.NotFound("Comment not found")
 	}
 
-	if !middleware.IsOwnerOrAdmin(user, comment.AuthorID) {
+	if !authorization.IsOwnerOrAdmin(user, comment.AuthorID) {
 		return nil, errors.Forbidden("You do not have permission to update this comment")
 	}
 
@@ -72,7 +72,7 @@ func (s *commentService) Delete(ctx context.Context, id string, user *authDomain
 		return errors.NotFound("Comment not found")
 	}
 
-	if !middleware.IsOwnerOrAdmin(user, comment.AuthorID) {
+	if !authorization.IsOwnerOrAdmin(user, comment.AuthorID) {
 		return errors.Forbidden("You do not have permission to delete this comment")
 	}
 

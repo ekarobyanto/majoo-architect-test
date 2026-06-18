@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/google/uuid"
+	"github.com/user/simple-blog/internal/modules/auth/authorization"
 	authDomain "github.com/user/simple-blog/internal/modules/auth/domain"
-	"github.com/user/simple-blog/internal/modules/auth/middleware"
 	"github.com/user/simple-blog/internal/modules/posts/domain"
 	"github.com/user/simple-blog/internal/platform/database"
 	"github.com/user/simple-blog/internal/platform/errors"
@@ -78,7 +78,7 @@ func (s *postService) Update(ctx context.Context, id string, user *authDomain.Us
 		return nil, err
 	}
 
-	if !middleware.IsOwnerOrAdmin(user, post.AuthorID) {
+	if !authorization.IsOwnerOrAdmin(user, post.AuthorID) {
 		return nil, errors.Forbidden("You do not have permission to update this post")
 	}
 
@@ -102,7 +102,7 @@ func (s *postService) Delete(ctx context.Context, id string, user *authDomain.Us
 		return err
 	}
 
-	if !middleware.IsOwnerOrAdmin(user, post.AuthorID) {
+	if !authorization.IsOwnerOrAdmin(user, post.AuthorID) {
 		return errors.Forbidden("You do not have permission to delete this post")
 	}
 

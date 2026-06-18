@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/user/simple-blog/internal/modules/health/domain"
 	"github.com/user/simple-blog/internal/platform/response"
-	"net/http"
 )
 
 type HealthHandler struct {
@@ -32,5 +33,4 @@ func (h *HealthHandler) CheckHealth(c *fiber.Ctx) error {
 	}
 
 	return response.Success(c, http.StatusOK, "Health check success", resp)
-	}
-
+}
