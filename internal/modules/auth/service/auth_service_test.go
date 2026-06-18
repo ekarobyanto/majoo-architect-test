@@ -286,8 +286,10 @@ func TestAuthService_Login_Success(t *testing.T) {
 	repo := new(mockAuthRepository)
 	tx := new(mockTransactor)
 	cfg := &config.Config{
-		JWTSecret:     "secret",
-		JWTExpiration: 24,
+		Auth: config.AuthConfig{
+			JWTSecret:     "secret",
+			JWTExpiration: 24,
+		},
 	}
 	svc := service.NewAuthService(repo, cfg, tx)
 

@@ -27,7 +27,9 @@ var _ = Describe("Health Integration", func() {
 	BeforeEach(func() {
 		var err error
 		cfg = &config.Config{
-			Port: "8080",
+			App: config.AppConfig{
+				Port: "8080",
+			},
 		}
 
 		// Mock database

@@ -23,8 +23,8 @@ type Server struct {
 
 // Start starts the fiber server
 func (s *Server) Start() error {
-	addr := fmt.Sprintf(":%s", s.Cfg.Port)
-	if s.Cfg.Port == "" {
+	addr := fmt.Sprintf(":%s", s.Cfg.App.Port)
+	if s.Cfg.App.Port == "" {
 		addr = ":8080"
 	}
 

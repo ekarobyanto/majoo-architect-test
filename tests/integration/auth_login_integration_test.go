@@ -29,9 +29,13 @@ var _ = Describe("Auth Login Integration", func() {
 
 	BeforeEach(func() {
 		cfg = &config.Config{
-			Port: "8080",
-			JWTSecret: "test-secret",
-			JWTExpiration: 24,
+			App: config.AppConfig{
+				Port: "8080",
+			},
+			Auth: config.AuthConfig{
+				JWTSecret:     "test-secret",
+				JWTExpiration: 24,
+			},
 		}
 		dbRaw, mockRaw, _ := sqlmock.New()
 		db = sqlx.NewDb(dbRaw, "postgres")

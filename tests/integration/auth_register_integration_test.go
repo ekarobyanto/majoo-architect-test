@@ -27,7 +27,11 @@ var _ = Describe("Auth Register Integration", func() {
 	)
 
 	BeforeEach(func() {
-		cfg = &config.Config{Port: "8080"}
+		cfg = &config.Config{
+			App: config.AppConfig{
+				Port: "8080",
+			},
+		}
 		dbRaw, mockRaw, _ := sqlmock.New()
 		db = sqlx.NewDb(dbRaw, "postgres")
 		mock = mockRaw

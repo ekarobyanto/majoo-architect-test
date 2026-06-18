@@ -129,11 +129,11 @@ func (s *authService) Login(ctx context.Context, req domain.LoginRequest) (*doma
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"roles": roleNames,
-		"exp":   time.Now().Add(time.Duration(s.cfg.JWTExpiration) * time.Hour).Unix(),
+		"exp":   time.Now().Add(time.Duration(s.cfg.Auth.JWTExpiration) * time.Hour).Unix(),
 		"iat":   time.Now().Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte(s.cfg.JWTSecret))
+	tokenString, err := token.SignedString([]byte(s.cfg.Auth.JWTSecret))
 	if err != nil {
 		return nil, errors.Internal("Failed to generate token")
 	}
