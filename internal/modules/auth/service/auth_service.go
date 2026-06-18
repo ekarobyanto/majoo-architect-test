@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/user/simple-blog/config"
 	"github.com/user/simple-blog/internal/modules/auth/domain"
@@ -10,6 +10,7 @@ import (
 	"github.com/user/simple-blog/internal/platform/errors"
 	"github.com/user/simple-blog/models"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type authService struct {
@@ -98,5 +99,49 @@ func (s *authService) Register(ctx context.Context, req domain.RegisterRequest) 
 }
 
 func (s *authService) Login(ctx context.Context, req domain.LoginRequest) (*domain.LoginResponse, error) {
-	return nil, fmt.Errorf("not implemented")
+	// 1. Get user by email
+	user, err := s.repo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.Unauthorized("Invalid credentials")
+	}
+
+	// 2. Verify password
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+	if err != nil {
+		return nil, errors.Unauthorized("Invalid credentials")
+	}
+
+	// 3. Get user roles
+	roles, err := s.repo.GetUserRoles(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	roleNames := make([]string, len(roles))
+	for i, r := range roles {
+		roleNames[i] = r.Name
+	}
+
+	// 4. Generate JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":   user.ID,
+		"roles": roleNames,
+		"exp":   time.Now().Add(time.Duration(s.cfg.JWTExpiration) * time.Hour).Unix(),
+		"iat":   time.Now().Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(s.cfg.JWTSecret))
+	if err != nil {
+		return nil, errors.Internal("Failed to generate token")
+	}
+
+	// 5. Return response
+	user.PasswordHash = ""
+	return &domain.LoginResponse{
+		AccessToken: tokenString,
+		User:        *user,
+	}, nil
 }
