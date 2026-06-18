@@ -11,6 +11,7 @@ import (
 	"github.com/user/simple-blog/internal/modules/auth/domain"
 	"github.com/user/simple-blog/internal/modules/auth/service"
 	"github.com/user/simple-blog/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type mockAuthRepository struct {
@@ -281,10 +282,13 @@ func TestAuthService_Register_GetRoleByNameError(t *testing.T) {
 	assert.Equal(t, "db error", err.Error())
 }
 
-func TestAuthService_Login_NotImplemented(t *testing.T) {
+func TestAuthService_Login_Success(t *testing.T) {
 	repo := new(mockAuthRepository)
 	tx := new(mockTransactor)
-	cfg := &config.Config{}
+	cfg := &config.Config{
+		JWTSecret:     "secret",
+		JWTExpiration: 24,
+	}
 	svc := service.NewAuthService(repo, cfg, tx)
 
 	ctx := context.Background()
@@ -293,9 +297,76 @@ func TestAuthService_Login_NotImplemented(t *testing.T) {
 		Password: "password123",
 	}
 
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	user := &models.User{
+		ID:           "user-id",
+		Username:     "testuser",
+		Email:        req.Email,
+		PasswordHash: string(hashedPassword),
+	}
+
+	roles := []models.Role{
+		{ID: "role-1", Name: "user"},
+	}
+
+	repo.On("GetByEmail", ctx, req.Email).Return(user, nil)
+	repo.On("GetUserRoles", ctx, user.ID).Return(roles, nil)
+
+	resp, err := svc.Login(ctx, req)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.NotEmpty(t, resp.AccessToken)
+	assert.Equal(t, user.ID, resp.User.ID)
+	assert.Empty(t, resp.User.PasswordHash)
+	repo.AssertExpectations(t)
+}
+
+func TestAuthService_Login_InvalidCredentials(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.LoginRequest{
+		Email:    "test@example.com",
+		Password: "wrongpassword",
+	}
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+	user := &models.User{
+		ID:           "user-id",
+		Email:        req.Email,
+		PasswordHash: string(hashedPassword),
+	}
+
+	repo.On("GetByEmail", ctx, req.Email).Return(user, nil)
+
 	resp, err := svc.Login(ctx, req)
 
 	assert.Error(t, err)
 	assert.Nil(t, resp)
-	assert.Equal(t, "not implemented", err.Error())
+	assert.Contains(t, err.Error(), "Invalid credentials")
+}
+
+func TestAuthService_Login_UserNotFound(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.LoginRequest{
+		Email:    "nonexistent@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, nil)
+
+	resp, err := svc.Login(ctx, req)
+
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "Invalid credentials")
 }
