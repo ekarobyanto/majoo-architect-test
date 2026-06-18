@@ -64,7 +64,7 @@ erDiagram
     MESSAGES ||--o{ MESSAGE_MEDIA : contains
 
     USERS {
-        bigint id PK
+        uuid id PK
         varchar username UK
         varchar email UK
         varchar password_hash
@@ -73,14 +73,14 @@ erDiagram
     }
 
     USER_RELATIONSHIPS {
-        bigint follower_id PK,FK
-        bigint following_id PK,FK
+        uuid follower_id PK,FK
+        uuid following_id PK,FK
         timestamp created_at
     }
 
     POSTS {
-        bigint id PK
-        bigint user_id FK
+        uuid id PK
+        uuid user_id FK
         text content
         int comment_count
         int reaction_count
@@ -88,64 +88,64 @@ erDiagram
     }
 
     MEDIA_ASSETS {
-        bigint id PK
-        bigint uploader_id FK
+        uuid id PK
+        uuid uploader_id FK
         varchar media_type
         text file_url
         timestamp created_at
     }
 
     POST_MEDIA {
-        bigint post_id PK,FK
-        bigint media_id PK,FK
+        uuid post_id PK,FK
+        uuid media_id PK,FK
     }
 
     COMMENTS {
-        bigint id PK
-        bigint post_id FK
-        bigint user_id FK
-        bigint parent_comment_id FK
+        uuid id PK
+        uuid post_id FK
+        uuid user_id FK
+        uuid parent_comment_id FK
         text content
         timestamp created_at
     }
 
     REACTIONS {
-        bigint id PK
-        bigint user_id FK
+        uuid id PK
+        uuid user_id FK
         varchar target_type
-        bigint target_id
+        uuid target_id
         varchar reaction_type
         timestamp created_at
     }
 
     CONVERSATIONS {
-        bigint id PK
+        uuid id PK
         varchar conversation_type
         timestamp created_at
     }
 
     CONVERSATION_PARTICIPANTS {
-        bigint conversation_id PK,FK
-        bigint user_id PK,FK
+        uuid conversation_id PK,FK
+        uuid user_id PK,FK
     }
 
     MESSAGES {
-        bigint id PK
-        bigint conversation_id FK
-        bigint sender_id FK
+        uuid id PK
+        uuid conversation_id FK
+        uuid sender_id FK
         text content
         timestamp created_at
     }
 
     MESSAGE_MEDIA {
-        bigint message_id PK,FK
-        bigint media_id PK,FK
+        uuid message_id PK,FK
+        uuid media_id PK,FK
     }
 
     NOTIFICATIONS {
-        bigint id PK
-        bigint recipient_id FK
-        bigint actor_id FK
+        uuid id PK
+        uuid recipient_id FK
+        uuid actor_id FK
         varchar notification_type
         boolean is_read
         timestamp created_at

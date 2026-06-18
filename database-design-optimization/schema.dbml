@@ -1,0 +1,212 @@
+Table users {
+  id uuid [pk]
+
+  username varchar(50) [not null, unique]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+
+  full_name varchar(255)
+  bio text
+  profile_image_url text
+
+  is_verified boolean [default: false]
+  status varchar(20) [default: 'active']
+
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table user_relationships {
+  follower_id uuid [not null]
+  following_id uuid [not null]
+
+  created_at timestamp [not null]
+
+  indexes {
+    (follower_id, following_id) [pk]
+    following_id
+  }
+}
+
+Table posts {
+  id uuid [pk]
+
+  user_id uuid [not null]
+
+  content text
+  visibility varchar(20) [default: 'public']
+
+  comment_count int [default: 0]
+  reaction_count int [default: 0]
+
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    user_id
+    created_at
+    (user_id, created_at)
+  }
+}
+
+Table media_assets {
+  id uuid [pk]
+
+  uploader_id uuid [not null]
+
+  media_type varchar(20) [not null]
+  file_url text [not null]
+
+  width int
+  height int
+  duration_seconds int
+
+  created_at timestamp [not null]
+}
+
+Table post_media {
+  post_id uuid [not null]
+  media_id uuid [not null]
+
+  indexes {
+    (post_id, media_id) [pk]
+  }
+}
+
+Table comments {
+  id uuid [pk]
+
+  post_id uuid [not null]
+  user_id uuid [not null]
+
+  parent_comment_id uuid
+
+  content text [not null]
+
+  reaction_count int [default: 0]
+
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    post_id
+    user_id
+    parent_comment_id
+    (post_id, created_at)
+  }
+}
+
+Table reactions {
+  id uuid [pk]
+
+  user_id uuid [not null]
+
+  target_type varchar(20) [not null]
+  target_id uuid [not null]
+
+  reaction_type varchar(20) [not null]
+
+  created_at timestamp [not null]
+
+  indexes {
+    (target_type, target_id)
+    (user_id, target_type, target_id) [unique]
+  }
+}
+
+Table conversations {
+  id uuid [pk]
+
+  conversation_type varchar(20) [default: 'direct']
+
+  created_at timestamp [not null]
+}
+
+Table conversation_participants {
+  conversation_id uuid [not null]
+  user_id uuid [not null]
+
+  joined_at timestamp [not null]
+
+  indexes {
+    (conversation_id, user_id) [pk]
+    user_id
+  }
+}
+
+Table messages {
+  id uuid [pk]
+
+  conversation_id uuid [not null]
+  sender_id uuid [not null]
+
+  message_type varchar(20) [default: 'text']
+
+  content text
+
+  created_at timestamp [not null]
+  edited_at timestamp
+
+  indexes {
+    conversation_id
+    sender_id
+    (conversation_id, created_at)
+  }
+}
+
+Table message_media {
+  message_id uuid [not null]
+  media_id uuid [not null]
+
+  indexes {
+    (message_id, media_id) [pk]
+  }
+}
+
+Table notifications {
+  id uuid [pk]
+
+  recipient_id uuid [not null]
+  actor_id uuid
+
+  notification_type varchar(50) [not null]
+
+  entity_type varchar(50)
+  entity_id uuid
+
+  is_read boolean [default: false]
+
+  created_at timestamp [not null]
+
+  indexes {
+    recipient_id
+    (recipient_id, is_read)
+    (recipient_id, created_at)
+  }
+}
+
+Ref: user_relationships.follower_id > users.id
+Ref: user_relationships.following_id > users.id
+
+Ref: posts.user_id > users.id
+
+Ref: media_assets.uploader_id > users.id
+
+Ref: post_media.post_id > posts.id
+Ref: post_media.media_id > media_assets.id
+
+Ref: comments.post_id > posts.id
+Ref: comments.user_id > users.id
+Ref: comments.parent_comment_id > comments.id
+
+Ref: conversation_participants.conversation_id > conversations.id
+Ref: conversation_participants.user_id > users.id
+
+Ref: messages.conversation_id > conversations.id
+Ref: messages.sender_id > users.id
+
+Ref: message_media.message_id > messages.id
+Ref: message_media.media_id > media_assets.id
+
+Ref: notifications.recipient_id > users.id
+Ref: notifications.actor_id > users.id
