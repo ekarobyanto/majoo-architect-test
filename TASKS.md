@@ -66,15 +66,15 @@
   * [x] Write tests
   * [x] Generate documentation
 
-* [ ] Task 4: Authorization
+* [x] Task 4: Authorization
 
-  * [ ] Implement role-based authorization
-  * [ ] Implement ownership-based authorization
-  * [ ] Implement post ownership verification
-  * [ ] Implement comment ownership verification
-  * [ ] Implement admin access verification
-  * [ ] Write tests
-  * [ ] Generate documentation
+  * [x] Implement role-based authorization
+  * [x] Implement ownership-based authorization
+  * [x] Implement post ownership verification
+  * [x] Implement comment ownership verification
+  * [x] Implement admin access verification
+  * [x] Write tests
+  * [x] Generate documentation
 
 * [ ] Task 5: Posts Module
 
