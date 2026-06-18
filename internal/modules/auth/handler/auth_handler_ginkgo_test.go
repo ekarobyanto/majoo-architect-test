@@ -51,6 +51,7 @@ var _ = Describe("AuthHandler", func() {
 		mockSvc = new(mockAuthService)
 		h = handler.NewAuthHandler(mockSvc)
 		app.Post("/auth/register", h.Register)
+		app.Post("/auth/login", h.Login)
 	})
 
 	Describe("Register", func() {
@@ -99,6 +100,60 @@ var _ = Describe("AuthHandler", func() {
 				resp, err := app.Test(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusUnprocessableEntity))
+			})
+		})
+	})
+
+	Describe("Login", func() {
+		Context("with valid credentials", func() {
+			It("should return 200 OK with token", func() {
+				reqBody := domain.LoginRequest{
+					Email:    "test@example.com",
+					Password: "password123",
+				}
+				expectedResp := &domain.LoginResponse{
+					AccessToken: "fake-jwt-token",
+				}
+
+				mockSvc.On("Login", mock.Anything, reqBody).Return(expectedResp, nil)
+
+				jsonBody, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(string(jsonBody)))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+				var fullResp struct {
+					Success bool                 `json:"success"`
+					Data    domain.LoginResponse `json:"data"`
+				}
+				body, _ := io.ReadAll(resp.Body)
+				json.Unmarshal(body, &fullResp)
+
+				Expect(fullResp.Success).To(BeTrue())
+				Expect(fullResp.Data.AccessToken).To(Equal("fake-jwt-token"))
+				mockSvc.AssertExpectations(GinkgoT())
+			})
+		})
+
+		Context("with invalid credentials", func() {
+			It("should return 401 Unauthorized", func() {
+				reqBody := domain.LoginRequest{
+					Email:    "wrong@example.com",
+					Password: "wrongpassword",
+				}
+
+				mockSvc.On("Login", mock.Anything, reqBody).Return(nil, errors.Unauthorized("Invalid credentials"))
+
+				jsonBody, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader(string(jsonBody)))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
 		})
 	})
