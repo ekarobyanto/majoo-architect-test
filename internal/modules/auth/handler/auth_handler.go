@@ -48,3 +48,33 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 
 	return response.Success(c, http.StatusCreated, "Registration successful", resp)
 }
+
+// Login godoc
+// @Summary Login user
+// @Description Authenticate user and return access token
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body domain.LoginRequest true "Login credentials"
+// @Success 200 {object} response.Response{data=domain.LoginResponse}
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 422 {object} errors.ErrorResponse
+// @Router /auth/login [post]
+func (h *AuthHandler) Login(c *fiber.Ctx) error {
+	var req domain.LoginRequest
+	if err := c.BodyParser(&req); err != nil {
+		return fiber.NewError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	if err := validation.Validate(req); err != nil {
+		return err
+	}
+
+	resp, err := h.svc.Login(c.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return response.Success(c, http.StatusOK, "Login successful", resp)
+}
