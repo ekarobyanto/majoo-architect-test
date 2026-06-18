@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/user/simple-blog/config"
 	"github.com/user/simple-blog/internal/modules/auth"
+	"github.com/user/simple-blog/internal/modules/comments"
 	"github.com/user/simple-blog/internal/modules/health"
 	"github.com/user/simple-blog/internal/modules/posts"
 	"github.com/user/simple-blog/internal/platform/database"
@@ -19,6 +20,7 @@ func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {
 		health.ProviderSet,
 		auth.ProviderSet,
 		posts.ProviderSet,
+		comments.ProviderSet,
 		database.NewTransactor,
 		server.NewServer,
 	)

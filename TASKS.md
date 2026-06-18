@@ -89,29 +89,16 @@
   * [x] Write Ginkgo tests
   * [x] Generate documentation
 
-* [ ] Task 6: Comments Module
+* [x] Task 6: Comments Module
 
-  * [ ] Define DTOs
-  * [ ] Implement Repository
-
-    * [ ] Create comment
-    * [ ] Get comment by id
-    * [ ] Update comment
-    * [ ] Delete comment
-  * [ ] Implement Service
-
-    * [ ] Verify post exists
-    * [ ] Create comment
-    * [ ] Update comment
-    * [ ] Delete comment
-  * [ ] Implement Handler
-  * [ ] Add request validation
-  * [ ] Integrate authorization
-  * [ ] Write Ginkgo tests
-
-    * [ ] Unit tests
-    * [ ] Integration tests
-  * [ ] Generate documentation
+  * [x] Define DTOs
+  * [x] Implement Repository
+  * [x] Implement Service
+  * [x] Implement Handler
+  * [x] Add request validation
+  * [x] Integrate authorization
+  * [x] Write Ginkgo tests
+  * [x] Generate documentation
 
 * [ ] Task 7: Final Integration
 
@@ -143,6 +130,6 @@
 
 ### Comments
 
-* [ ] POST `/posts/{id}/comments`
-* [ ] PUT `/comments/{id}`
-* [ ] DELETE `/comments/{id}`
+* [x] POST `/posts/{id}/comments`
+* [x] PUT `/comments/{id}`
+* [x] DELETE `/comments/{id}`

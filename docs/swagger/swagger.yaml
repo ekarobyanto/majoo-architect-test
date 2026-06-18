@@ -42,6 +42,22 @@ definitions:
       username:
         type: string
     type: object
+  github_com_user_simple-blog_internal_modules_comments_domain.CreateCommentRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+    required:
+    - content
+    type: object
+  github_com_user_simple-blog_internal_modules_comments_domain.UpdateCommentRequest:
+    properties:
+      content:
+        minLength: 1
+        type: string
+    required:
+    - content
+    type: object
   github_com_user_simple-blog_internal_modules_health_domain.HealthResponse:
     properties:
       message:
@@ -126,6 +142,21 @@ definitions:
       meta: {}
       success:
         type: boolean
+    type: object
+  models.Comment:
+    properties:
+      author_id:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      post_id:
+        type: string
+      updated_at:
+        type: string
     type: object
   models.Post:
     properties:
@@ -246,6 +277,60 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
+  /comments/{id}:
+    delete:
+      description: Delete a comment by ID
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing comment by ID
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_user_simple-blog_internal_modules_comments_domain.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Comment'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update a comment
+      tags:
+      - Comments
   /health:
     get:
       consumes:
@@ -443,6 +528,40 @@ paths:
       summary: Update a post
       tags:
       - Posts
+  /posts/{id}/comments:
+    post:
+      consumes:
+      - application/json
+      description: Add a new comment to an existing blog post
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Comment details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_user_simple-blog_internal_modules_comments_domain.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Comment'
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Add a comment to a post
+      tags:
+      - Comments
 securityDefinitions:
   ApiKeyAuth:
     in: header

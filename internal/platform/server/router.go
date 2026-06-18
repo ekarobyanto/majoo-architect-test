@@ -11,6 +11,8 @@ import (
 	_ "github.com/user/simple-blog/docs/swagger"
 	authHandler "github.com/user/simple-blog/internal/modules/auth/handler"
 	authRouter "github.com/user/simple-blog/internal/modules/auth/router"
+	commentHandler "github.com/user/simple-blog/internal/modules/comments/handler"
+	commentRouter "github.com/user/simple-blog/internal/modules/comments/router"
 	healthHandler "github.com/user/simple-blog/internal/modules/health/handler"
 	healthRouter "github.com/user/simple-blog/internal/modules/health/router"
 	postHandler "github.com/user/simple-blog/internal/modules/posts/handler"
@@ -25,6 +27,7 @@ func NewServer(
 	healthHdl *healthHandler.HealthHandler,
 	authHdl *authHandler.AuthHandler,
 	postHdl *postHandler.PostHandler,
+	commentHdl *commentHandler.CommentHandler,
 ) *Server {
 	app := fiber.New(fiber.Config{
 		AppName:      "Simple Blog",
@@ -43,13 +46,15 @@ func NewServer(
 	healthRouter.RegisterRoutes(app, healthHdl)
 	authRouter.RegisterRoutes(app, authHdl)
 	postRouter.RegisterRoutes(app, postHdl, cfg)
+	commentRouter.RegisterRoutes(app, commentHdl, cfg)
 
 	return &Server{
-		App:           app,
-		Cfg:           cfg,
-		DB:            db,
-		HealthHandler: healthHdl,
-		AuthHandler:   authHdl,
-		PostHandler:   postHdl,
+		App:            app,
+		Cfg:            cfg,
+		DB:             db,
+		HealthHandler:  healthHdl,
+		AuthHandler:    authHdl,
+		PostHandler:    postHdl,
+		CommentHandler: commentHdl,
 	}
 }

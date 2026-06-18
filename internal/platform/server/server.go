@@ -9,18 +9,20 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/user/simple-blog/config"
 	authHandler "github.com/user/simple-blog/internal/modules/auth/handler"
+	commentHandler "github.com/user/simple-blog/internal/modules/comments/handler"
 	healthHandler "github.com/user/simple-blog/internal/modules/health/handler"
 	postHandler "github.com/user/simple-blog/internal/modules/posts/handler"
 )
 
 // Server holds the fiber app and dependencies
 type Server struct {
-	App           *fiber.App
-	Cfg           *config.Config
-	DB            *sqlx.DB
-	HealthHandler *healthHandler.HealthHandler
-	AuthHandler   *authHandler.AuthHandler
-	PostHandler   *postHandler.PostHandler
+	App            *fiber.App
+	Cfg            *config.Config
+	DB             *sqlx.DB
+	HealthHandler  *healthHandler.HealthHandler
+	AuthHandler    *authHandler.AuthHandler
+	PostHandler    *postHandler.PostHandler
+	CommentHandler *commentHandler.CommentHandler
 }
 
 // Start starts the fiber server
