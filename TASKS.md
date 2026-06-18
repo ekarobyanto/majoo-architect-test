@@ -54,17 +54,17 @@
     * [x] Integration tests
   * [x] Generate documentation
 
-* [ ] Task 3: Authentication Middleware
+* [x] Task 3: Authentication Middleware
 
-  * [ ] Implement JWT middleware
-  * [ ] Extract bearer token
-  * [ ] Validate JWT signature
-  * [ ] Validate JWT expiration
-  * [ ] Extract user claims
-  * [ ] Inject user id into request context
-  * [ ] Inject user roles into request context
-  * [ ] Write tests
-  * [ ] Generate documentation
+  * [x] Implement JWT middleware
+  * [x] Extract bearer token
+  * [x] Validate JWT signature
+  * [x] Validate JWT expiration
+  * [x] Extract user claims
+  * [x] Inject user id into request context
+  * [x] Inject user roles into request context
+  * [x] Write tests
+  * [x] Generate documentation
 
 * [ ] Task 4: Authorization
 
