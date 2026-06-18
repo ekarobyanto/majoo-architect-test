@@ -10,6 +10,7 @@ import (
 	"github.com/user/simple-blog/config"
 	authHandler "github.com/user/simple-blog/internal/modules/auth/handler"
 	healthHandler "github.com/user/simple-blog/internal/modules/health/handler"
+	postHandler "github.com/user/simple-blog/internal/modules/posts/handler"
 )
 
 // Server holds the fiber app and dependencies
@@ -19,6 +20,7 @@ type Server struct {
 	DB            *sqlx.DB
 	HealthHandler *healthHandler.HealthHandler
 	AuthHandler   *authHandler.AuthHandler
+	PostHandler   *postHandler.PostHandler
 }
 
 // Start starts the fiber server

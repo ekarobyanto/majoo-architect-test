@@ -9,6 +9,7 @@ import (
 	"github.com/user/simple-blog/config"
 	"github.com/user/simple-blog/internal/modules/auth"
 	"github.com/user/simple-blog/internal/modules/health"
+	"github.com/user/simple-blog/internal/modules/posts"
 	"github.com/user/simple-blog/internal/platform/database"
 	"github.com/user/simple-blog/internal/platform/server"
 )
@@ -17,6 +18,7 @@ func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {
 	wire.Build(
 		health.ProviderSet,
 		auth.ProviderSet,
+		posts.ProviderSet,
 		database.NewTransactor,
 		server.NewServer,
 	)

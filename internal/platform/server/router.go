@@ -13,6 +13,8 @@ import (
 	authRouter "github.com/user/simple-blog/internal/modules/auth/router"
 	healthHandler "github.com/user/simple-blog/internal/modules/health/handler"
 	healthRouter "github.com/user/simple-blog/internal/modules/health/router"
+	postHandler "github.com/user/simple-blog/internal/modules/posts/handler"
+	postRouter "github.com/user/simple-blog/internal/modules/posts/router"
 	"github.com/user/simple-blog/internal/platform/errors"
 )
 
@@ -22,6 +24,7 @@ func NewServer(
 	db *sqlx.DB,
 	healthHdl *healthHandler.HealthHandler,
 	authHdl *authHandler.AuthHandler,
+	postHdl *postHandler.PostHandler,
 ) *Server {
 	app := fiber.New(fiber.Config{
 		AppName:      "Simple Blog",
@@ -39,6 +42,7 @@ func NewServer(
 	// Register Routes
 	healthRouter.RegisterRoutes(app, healthHdl)
 	authRouter.RegisterRoutes(app, authHdl)
+	postRouter.RegisterRoutes(app, postHdl, cfg)
 
 	return &Server{
 		App:           app,
@@ -46,5 +50,6 @@ func NewServer(
 		DB:            db,
 		HealthHandler: healthHdl,
 		AuthHandler:   authHdl,
+		PostHandler:   postHdl,
 	}
 }

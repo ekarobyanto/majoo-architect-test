@@ -76,33 +76,18 @@
   * [x] Write tests
   * [x] Generate documentation
 
-* [ ] Task 5: Posts Module
+* [x] Task 5: Posts Module
 
-  * [ ] Define DTOs
-  * [ ] Implement Repository
-
-    * [ ] Create post
-    * [ ] Get post by id
-    * [ ] Get paginated posts
-    * [ ] Update post
-    * [ ] Delete post
-  * [ ] Implement Service
-
-    * [ ] Create post
-    * [ ] Get posts
-    * [ ] Get post detail
-    * [ ] Update post
-    * [ ] Delete post
-  * [ ] Implement Handler
-  * [ ] Add request validation
-  * [ ] Integrate authorization
-  * [ ] Implement pagination
-  * [ ] Implement delete transaction
-  * [ ] Write Ginkgo tests
-
-    * [ ] Unit tests
-    * [ ] Integration tests
-  * [ ] Generate documentation
+  * [x] Define DTOs
+  * [x] Implement Repository
+  * [x] Implement Service
+  * [x] Implement Handler
+  * [x] Add request validation
+  * [x] Integrate authorization
+  * [x] Implement pagination
+  * [x] Implement delete transaction
+  * [x] Write Ginkgo tests
+  * [x] Generate documentation
 
 * [ ] Task 6: Comments Module
 
@@ -150,11 +135,11 @@
 
 ### Posts
 
-* [ ] POST `/posts`
-* [ ] GET `/posts`
-* [ ] GET `/posts/{id}`
-* [ ] PUT `/posts/{id}`
-* [ ] DELETE `/posts/{id}`
+* [x] POST `/posts`
+* [x] GET `/posts`
+* [x] GET `/posts/{id}`
+* [x] PUT `/posts/{id}`
+* [x] DELETE `/posts/{id}`
 
 ### Comments
 

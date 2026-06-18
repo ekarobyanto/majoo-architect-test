@@ -49,6 +49,42 @@ definitions:
       status:
         type: string
     type: object
+  github_com_user_simple-blog_internal_modules_posts_domain.CreatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        maxLength: 255
+        minLength: 3
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  github_com_user_simple-blog_internal_modules_posts_domain.PaginatedPostResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Post'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_user_simple-blog_internal_modules_posts_domain.UpdatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        maxLength: 255
+        minLength: 3
+        type: string
+    type: object
   github_com_user_simple-blog_internal_platform_errors.AppError:
     properties:
       code:
@@ -90,6 +126,21 @@ definitions:
       meta: {}
       success:
         type: boolean
+    type: object
+  models.Post:
+    properties:
+      author_id:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
     type: object
   models.User:
     properties:
@@ -210,6 +261,188 @@ paths:
       summary: Check service health
       tags:
       - Health
+  /posts:
+    get:
+      description: Get paginated list of posts
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_user_simple-blog_internal_modules_posts_domain.PaginatedPostResponse'
+              type: object
+      summary: Get all posts
+      tags:
+      - Posts
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog post
+      parameters:
+      - description: Post details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_user_simple-blog_internal_modules_posts_domain.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+      tags:
+      - Posts
+  /posts/{id}:
+    delete:
+      description: Delete a post by ID
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a post
+      tags:
+      - Posts
+    get:
+      description: Get a post by its ID
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+      summary: Get post by ID
+      tags:
+      - Posts
+    put:
+      consumes:
+      - application/json
+      description: Update an existing post by ID
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_user_simple-blog_internal_modules_posts_domain.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.Post'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a post
+      tags:
+      - Posts
 securityDefinitions:
   ApiKeyAuth:
     in: header

@@ -15,6 +15,9 @@ import (
 	"github.com/user/simple-blog/internal/modules/health/handler"
 	"github.com/user/simple-blog/internal/modules/health/repository"
 	"github.com/user/simple-blog/internal/modules/health/service"
+	handler3 "github.com/user/simple-blog/internal/modules/posts/handler"
+	repository3 "github.com/user/simple-blog/internal/modules/posts/repository"
+	service3 "github.com/user/simple-blog/internal/modules/posts/service"
 	"github.com/user/simple-blog/internal/platform/database"
 	"github.com/user/simple-blog/internal/platform/server"
 )
@@ -29,6 +32,9 @@ func InitializeServer(cfg *config.Config, db *sqlx.DB) *server.Server {
 	transactor := database.NewTransactor(db)
 	authService := service2.NewAuthService(authRepository, cfg, transactor)
 	authHandler := handler2.NewAuthHandler(authService)
-	serverServer := server.NewServer(cfg, db, healthHandler, authHandler)
+	postRepository := repository3.NewPostRepository(db)
+	postService := service3.NewPostService(postRepository, transactor)
+	postHandler := handler3.NewPostHandler(postService)
+	serverServer := server.NewServer(cfg, db, healthHandler, authHandler, postHandler)
 	return serverServer
 }
