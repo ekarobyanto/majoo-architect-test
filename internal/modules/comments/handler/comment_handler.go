@@ -24,7 +24,7 @@ func NewCommentHandler(svc domain.CommentService) *CommentHandler {
 // @Tags Comments
 // @Accept json
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param id path string true "Post ID"
 // @Param request body domain.CreateCommentRequest true "Comment details"
 // @Success 201 {object} response.Response{data=models.Comment}
@@ -55,7 +55,7 @@ func (h *CommentHandler) Create(c *fiber.Ctx) error {
 // @Tags Comments
 // @Accept json
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param id path string true "Comment ID"
 // @Param request body domain.UpdateCommentRequest true "Update details"
 // @Success 200 {object} response.Response{data=models.Comment}
@@ -85,7 +85,7 @@ func (h *CommentHandler) Update(c *fiber.Ctx) error {
 // @Description Delete a comment by ID
 // @Tags Comments
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param id path string true "Comment ID"
 // @Success 200 {object} response.Response
 // @Router /comments/{id} [delete]

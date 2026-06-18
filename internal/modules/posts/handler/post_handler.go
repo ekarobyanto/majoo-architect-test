@@ -25,7 +25,7 @@ func NewPostHandler(svc domain.PostService) *PostHandler {
 // @Tags Posts
 // @Accept json
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param request body domain.CreatePostRequest true "Post details"
 // @Success 201 {object} response.Response{data=models.Post}
 // @Failure 400 {object} errors.ErrorResponse
@@ -102,7 +102,7 @@ func (h *PostHandler) GetPaginated(c *fiber.Ctx) error {
 // @Tags Posts
 // @Accept json
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param id path string true "Post ID"
 // @Param request body domain.UpdatePostRequest true "Update details"
 // @Success 200 {object} response.Response{data=models.Post}
@@ -137,7 +137,7 @@ func (h *PostHandler) Update(c *fiber.Ctx) error {
 // @Description Delete a post by ID
 // @Tags Posts
 // @Produce json
-// @Security BearerAuth
+// @Security ApiKeyAuth
 // @Param id path string true "Post ID"
 // @Success 200 {object} response.Response
 // @Failure 401 {object} errors.ErrorResponse

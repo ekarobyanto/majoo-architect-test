@@ -186,7 +186,7 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:3000
+host: localhost:8080
 info:
   contact:
     email: support@example.com
@@ -294,7 +294,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Delete a comment
       tags:
       - Comments
@@ -327,7 +327,7 @@ paths:
                   $ref: '#/definitions/models.Comment'
               type: object
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Update a comment
       tags:
       - Comments
@@ -411,7 +411,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Create a new post
       tags:
       - Posts
@@ -444,7 +444,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Delete a post
       tags:
       - Posts
@@ -524,7 +524,7 @@ paths:
           schema:
             $ref: '#/definitions/github_com_user_simple-blog_internal_platform_errors.ErrorResponse'
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Update a post
       tags:
       - Posts
@@ -558,10 +558,13 @@ paths:
                   $ref: '#/definitions/models.Comment'
               type: object
       security:
-      - BearerAuth: []
+      - ApiKeyAuth: []
       summary: Add a comment to a post
       tags:
       - Comments
+schemes:
+- http
+- https
 securityDefinitions:
   ApiKeyAuth:
     in: header

@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/user/simple-blog/config"
@@ -10,7 +12,6 @@ import (
 	"github.com/user/simple-blog/internal/platform/errors"
 	"github.com/user/simple-blog/models"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type authService struct {
