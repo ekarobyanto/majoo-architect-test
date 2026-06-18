@@ -34,25 +34,25 @@
     * [x] Integration tests
   * [x] Generate documentation
 
-* [ ] Task 2: Authentication Module - Login
+* [x] Task 2: Authentication Module - Login
 
-  * [ ] Define Login DTOs
-  * [ ] Implement Repository
+  * [x] Define Login DTOs
+  * [x] Implement Repository
 
-    * [ ] Get user by email
-    * [ ] Get roles by user id
-  * [ ] Implement Service
+    * [x] Get user by email
+    * [x] Get roles by user id
+  * [x] Implement Service
 
-    * [ ] Verify password
-    * [ ] Load user roles
-    * [ ] Generate JWT
-  * [ ] Implement Handler
-  * [ ] Add request validation
-  * [ ] Write Ginkgo tests
+    * [x] Verify password
+    * [x] Load user roles
+    * [x] Generate JWT
+  * [x] Implement Handler
+  * [x] Add request validation
+  * [x] Write Ginkgo tests
 
-    * [ ] Unit tests
-    * [ ] Integration tests
-  * [ ] Generate documentation
+    * [x] Unit tests
+    * [x] Integration tests
+  * [x] Generate documentation
 
 * [ ] Task 3: Authentication Middleware
 
@@ -145,8 +145,8 @@
 
 ### Authentication
 
-* [ ] POST `/auth/register`
-* [ ] POST `/auth/login`
+* [x] POST `/auth/register`
+* [x] POST `/auth/login`
 
 ### Posts
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/user/simple-blog/internal/modules/auth/domain"
+	"github.com/user/simple-blog/internal/platform/errors"
 	"github.com/user/simple-blog/internal/platform/response"
 	"github.com/user/simple-blog/internal/platform/validation"
 )
