@@ -3,6 +3,7 @@ package middleware_test
 import (
 	"github.com/user/simple-blog/config"
 	"github.com/user/simple-blog/internal/modules/auth/middleware"
+	"github.com/user/simple-blog/internal/platform/errors"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -23,7 +24,9 @@ var _ = Describe("AuthMiddleware", func() {
 	var cfg *config.Config
 
 	BeforeEach(func() {
-		app = fiber.New()
+		app = fiber.New(fiber.Config{
+			ErrorHandler: errors.GlobalErrorHandler,
+		})
 		cfg = &config.Config{
 			Auth: config.AuthConfig{
 				JWTSecret: "secret",
@@ -57,6 +60,7 @@ var _ = Describe("AuthMiddleware", func() {
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 				"sub":   "123",
 				"email": "test@example.com",
+				"roles": []string{"user"},
 				"exp":   time.Now().Add(time.Hour).Unix(),
 			})
 			tokenString, _ := token.SignedString([]byte(cfg.Auth.JWTSecret))
