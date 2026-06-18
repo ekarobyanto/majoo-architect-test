@@ -8,10 +8,9 @@ import (
 
 // Config holds all configuration for the application
 type Config struct {
-	Port          string   `mapstructure:"PORT"`
-	JWTSecret     string   `mapstructure:"JWT_SECRET"`
-	JWTExpiration int      `mapstructure:"JWT_EXPIRATION_HOURS"`
-	DB            DBConfig `mapstructure:",squash"`
+	App  AppConfig  `mapstructure:",squash"`
+	Auth AuthConfig `mapstructure:",squash"`
+	DB   DBConfig   `mapstructure:",squash"`
 }
 
 // LoadConfig loads configuration from .env file or environment variables
@@ -21,15 +20,9 @@ func LoadConfig() (*Config, error) {
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	// Bind general env vars
-	v.BindEnv("PORT")
-	v.BindEnv("JWT_SECRET")
-	v.BindEnv("JWT_EXPIRATION_HOURS")
-
-	// Set defaults
-	v.SetDefault("JWT_EXPIRATION_HOURS", 24)
-
-	// Bind module-specific env vars
+	// Bind env vars via modular functions
+	BindAppEnv(v)
+	BindAuthEnv(v)
 	BindDBEnv(v)
 
 	v.SetConfigFile(".env")
