@@ -16,7 +16,7 @@ DB_URL=postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?ssl
 # Packages that contain unit/integration tests
 TEST_PKGS=$(shell go list -f '{{if or .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}' ./...)
 
-.PHONY: all build run test ginkgo deps clean migrate-up migrate-down migrate-status migrate-create seed
+.PHONY: all build run fresh-run test ginkgo deps clean migrate-up migrate-down migrate-status migrate-create seed
 
 all: build
 
@@ -29,6 +29,14 @@ build:
 ## run: Run the application directly
 run:
 	@go run $(CMD_DIR)/main.go
+
+## fresh-run: Clean, migrate, seed, rebuild, and run the application from scratch
+fresh-run:
+	@$(MAKE) clean
+	@$(MAKE) migrate-up
+	@$(MAKE) seed
+	@$(MAKE) build
+	@$(BUILD_DIR)/$(APP_NAME)
 
 ## test: Run all tests using standard go test
 test:
