@@ -372,3 +372,56 @@ func TestAuthService_Login_UserNotFound(t *testing.T) {
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "Invalid credentials")
 }
+
+func TestAuthService_Login_GetByEmailError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.LoginRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	repo.On("GetByEmail", ctx, req.Email).Return(nil, fmt.Errorf("db error"))
+
+	resp, err := svc.Login(ctx, req)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "db error", err.Error())
+}
+
+func TestAuthService_Login_GetUserRolesError(t *testing.T) {
+	repo := new(mockAuthRepository)
+	tx := new(mockTransactor)
+	cfg := &config.Config{
+		Auth: config.AuthConfig{
+			JWTSecret:     "secret",
+			JWTExpiration: 24,
+		},
+	}
+	svc := service.NewAuthService(repo, cfg, tx)
+
+	ctx := context.Background()
+	req := domain.LoginRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	user := &models.User{
+		ID:           "user-id",
+		Email:        req.Email,
+		PasswordHash: string(hashedPassword),
+	}
+
+	repo.On("GetByEmail", ctx, req.Email).Return(user, nil)
+	repo.On("GetUserRoles", ctx, user.ID).Return([]models.Role{}, fmt.Errorf("roles error"))
+
+	resp, err := svc.Login(ctx, req)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Equal(t, "roles error", err.Error())
+}

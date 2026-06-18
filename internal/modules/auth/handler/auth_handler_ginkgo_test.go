@@ -73,7 +73,7 @@ var _ = Describe("AuthHandler", func() {
 				jsonBody, _ := json.Marshal(reqBody)
 				req := httptest.NewRequest(http.MethodPost, "/auth/register", strings.NewReader(string(jsonBody)))
 				req.Header.Set("Content-Type", "application/json")
-				
+
 				resp, err := app.Test(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusCreated))
@@ -84,7 +84,7 @@ var _ = Describe("AuthHandler", func() {
 				}
 				body, _ := io.ReadAll(resp.Body)
 				json.Unmarshal(body, &fullResp)
-				
+
 				Expect(fullResp.Success).To(BeTrue())
 				Expect(fullResp.Data.Username).To(Equal("newuser"))
 				mockSvc.AssertExpectations(GinkgoT())
@@ -100,6 +100,37 @@ var _ = Describe("AuthHandler", func() {
 				resp, err := app.Test(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusUnprocessableEntity))
+			})
+		})
+
+		Context("with invalid JSON body", func() {
+			It("should return 400 Bad Request", func() {
+				req := httptest.NewRequest(http.MethodPost, "/auth/register", strings.NewReader("{"))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+			})
+		})
+
+		Context("when service returns an error", func() {
+			It("should return the mapped error status", func() {
+				reqBody := domain.RegisterRequest{
+					Username: "existing",
+					Email:    "existing@example.com",
+					Password: "password123",
+				}
+
+				mockSvc.On("Register", mock.Anything, reqBody).Return(nil, errors.Conflict("Username already taken"))
+
+				jsonBody, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/auth/register", strings.NewReader(string(jsonBody)))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusConflict))
 			})
 		})
 	})
@@ -154,6 +185,17 @@ var _ = Describe("AuthHandler", func() {
 				resp, err := app.Test(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusUnauthorized))
+			})
+		})
+
+		Context("with invalid JSON body", func() {
+			It("should return 400 Bad Request", func() {
+				req := httptest.NewRequest(http.MethodPost, "/auth/login", strings.NewReader("{"))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
 			})
 		})
 	})

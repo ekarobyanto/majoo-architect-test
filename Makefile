@@ -13,6 +13,9 @@ endif
 # Database URL for migrations
 DB_URL=postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)
 
+# Packages that contain unit/integration tests
+TEST_PKGS=$(shell go list -f '{{if or .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}' ./...)
+
 .PHONY: all build run test ginkgo deps clean migrate-up migrate-down migrate-status migrate-create seed
 
 all: build
@@ -37,7 +40,7 @@ ginkgo:
 
 ## test-coverage: Run tests with coverage and show summary
 test-coverage:
-	@go test -coverprofile=coverage.out ./... || true
+	@go test -coverprofile=coverage.out $(TEST_PKGS)
 	@if [ -f coverage.out ]; then \
 		go tool cover -func=coverage.out; \
 		rm coverage.out; \
@@ -45,7 +48,7 @@ test-coverage:
 
 ## test-coverage-html: Run tests with coverage and generate HTML report
 test-coverage-html:
-	@go test -coverprofile=coverage.out ./... || true
+	@go test -coverprofile=coverage.out $(TEST_PKGS)
 	@if [ -f coverage.out ]; then \
 		go tool cover -html=coverage.out -o coverage.html; \
 		rm coverage.out; \

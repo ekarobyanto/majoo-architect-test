@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,6 +93,39 @@ func TestCommentService_Create(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
+func TestCommentService_Create_PostServiceError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	req := domain.CreateCommentRequest{Content: "Great post!"}
+
+	postSvc.On("GetByID", ctx, "post-1").Return(nil, errors.New("post error"))
+
+	comment, err := svc.Create(ctx, "post-1", "user-1", req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Equal(t, "post error", err.Error())
+}
+
+func TestCommentService_Create_RepoCreateError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	req := domain.CreateCommentRequest{Content: "Great post!"}
+
+	postSvc.On("GetByID", ctx, "post-1").Return(&models.Post{ID: "post-1"}, nil)
+	repo.On("Create", ctx, mock.AnythingOfType("*models.Comment")).Return(errors.New("insert failed"))
+
+	comment, err := svc.Create(ctx, "post-1", "user-1", req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Contains(t, err.Error(), "Failed to create comment")
+}
+
 func TestCommentService_Update_Success(t *testing.T) {
 	repo := new(mockCommentRepository)
 	postSvc := new(mockPostService)
@@ -108,6 +142,78 @@ func TestCommentService_Update_Success(t *testing.T) {
 	comment, err := svc.Update(ctx, "c1", user, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "Updated content", comment.Content)
+	repo.AssertExpectations(t)
+}
+
+func TestCommentService_Update_GetByIDError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+	req := domain.UpdateCommentRequest{Content: "Updated content"}
+
+	repo.On("GetByID", ctx, "c1").Return(nil, errors.New("db error"))
+
+	comment, err := svc.Update(ctx, "c1", user, req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Contains(t, err.Error(), "Failed to fetch comment")
+}
+
+func TestCommentService_Update_NotFound(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+	req := domain.UpdateCommentRequest{Content: "Updated content"}
+
+	repo.On("GetByID", ctx, "c1").Return(nil, nil)
+
+	comment, err := svc.Update(ctx, "c1", user, req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Contains(t, err.Error(), "Comment not found")
+}
+
+func TestCommentService_Update_Forbidden(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "other-user", Roles: []string{"user"}}
+	req := domain.UpdateCommentRequest{Content: "Updated content"}
+
+	existingComment := &models.Comment{ID: "c1", AuthorID: "owner-user", Content: "Old"}
+	repo.On("GetByID", ctx, "c1").Return(existingComment, nil)
+
+	comment, err := svc.Update(ctx, "c1", user, req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Contains(t, err.Error(), "You do not have permission")
+}
+
+func TestCommentService_Update_RepoUpdateError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+	req := domain.UpdateCommentRequest{Content: "Updated content"}
+
+	existingComment := &models.Comment{ID: "c1", AuthorID: "user-1", Content: "Old"}
+	repo.On("GetByID", ctx, "c1").Return(existingComment, nil)
+	repo.On("Update", ctx, existingComment).Return(errors.New("update failed"))
+
+	comment, err := svc.Update(ctx, "c1", user, req)
+	assert.Error(t, err)
+	assert.Nil(t, comment)
+	assert.Contains(t, err.Error(), "Failed to update comment")
 }
 
 func TestCommentService_Delete_Forbidden(t *testing.T) {
@@ -124,4 +230,66 @@ func TestCommentService_Delete_Forbidden(t *testing.T) {
 	err := svc.Delete(ctx, "c1", user)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "You do not have permission")
+}
+
+func TestCommentService_Delete_GetByIDError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+	repo.On("GetByID", ctx, "c1").Return(nil, errors.New("db error"))
+
+	err := svc.Delete(ctx, "c1", user)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to fetch comment")
+}
+
+func TestCommentService_Delete_NotFound(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+	repo.On("GetByID", ctx, "c1").Return(nil, nil)
+
+	err := svc.Delete(ctx, "c1", user)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Comment not found")
+}
+
+func TestCommentService_Delete_RepoDeleteError(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+
+	existingComment := &models.Comment{ID: "c1", AuthorID: "user-1"}
+	repo.On("GetByID", ctx, "c1").Return(existingComment, nil)
+	repo.On("Delete", ctx, "c1").Return(errors.New("delete failed"))
+
+	err := svc.Delete(ctx, "c1", user)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to delete comment")
+}
+
+func TestCommentService_Delete_Success(t *testing.T) {
+	repo := new(mockCommentRepository)
+	postSvc := new(mockPostService)
+	svc := service.NewCommentService(repo, postSvc)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "user-1", Roles: []string{"user"}}
+
+	existingComment := &models.Comment{ID: "c1", AuthorID: "user-1"}
+	repo.On("GetByID", ctx, "c1").Return(existingComment, nil)
+	repo.On("Delete", ctx, "c1").Return(nil)
+
+	err := svc.Delete(ctx, "c1", user)
+	assert.NoError(t, err)
+	repo.AssertExpectations(t)
 }

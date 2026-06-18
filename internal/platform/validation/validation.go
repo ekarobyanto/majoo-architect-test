@@ -8,9 +8,9 @@ import (
 var validate = validator.New()
 
 type ErrorField struct {
-	Field   string `json:"field"`
-	Tag     string `json:"tag"`
-	Value   string `json:"value,omitempty"`
+	Field string `json:"field"`
+	Tag   string `json:"tag"`
+	Value string `json:"value,omitempty"`
 }
 
 func Validate(s interface{}) error {

@@ -66,6 +66,8 @@ var _ = Describe("CommentHandler", func() {
 		})
 
 		app.Post("/posts/:id/comments", h.Create)
+		app.Put("/comments/:id", h.Update)
+		app.Delete("/comments/:id", h.Delete)
 	})
 
 	Describe("Create", func() {
@@ -81,6 +83,89 @@ var _ = Describe("CommentHandler", func() {
 			resp, err := app.Test(req)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(http.StatusCreated))
+		})
+
+		It("should return 400 on invalid JSON body", func() {
+			req := httptest.NewRequest(http.MethodPost, "/posts/post-1/comments", strings.NewReader("{"))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			reqBody := domain.CreateCommentRequest{Content: "New Comment"}
+			mockSvc.On("Create", mock.Anything, "post-1", "user-1", reqBody).
+				Return(nil, errors.Internal("Failed to create comment"))
+
+			jsonBody, _ := json.Marshal(reqBody)
+			req := httptest.NewRequest(http.MethodPost, "/posts/post-1/comments", strings.NewReader(string(jsonBody)))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Describe("Update", func() {
+		It("should return 200 OK", func() {
+			reqBody := domain.UpdateCommentRequest{Content: "Updated content"}
+			mockSvc.On("Update", mock.Anything, "comment-1", mock.AnythingOfType("*domain.UserContext"), reqBody).
+				Return(&models.Comment{ID: "comment-1", Content: reqBody.Content}, nil)
+
+			jsonBody, _ := json.Marshal(reqBody)
+			req := httptest.NewRequest(http.MethodPut, "/comments/comment-1", strings.NewReader(string(jsonBody)))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return 400 on invalid JSON body", func() {
+			req := httptest.NewRequest(http.MethodPut, "/comments/comment-1", strings.NewReader("{"))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			reqBody := domain.UpdateCommentRequest{Content: "Updated content"}
+			mockSvc.On("Update", mock.Anything, "comment-1", mock.AnythingOfType("*domain.UserContext"), reqBody).
+				Return(nil, errors.Forbidden("You do not have permission to update this comment"))
+
+			jsonBody, _ := json.Marshal(reqBody)
+			req := httptest.NewRequest(http.MethodPut, "/comments/comment-1", strings.NewReader(string(jsonBody)))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusForbidden))
+		})
+	})
+
+	Describe("Delete", func() {
+		It("should return 200 OK", func() {
+			mockSvc.On("Delete", mock.Anything, "comment-1", mock.AnythingOfType("*domain.UserContext")).Return(nil)
+
+			req := httptest.NewRequest(http.MethodDelete, "/comments/comment-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			mockSvc.On("Delete", mock.Anything, "comment-1", mock.AnythingOfType("*domain.UserContext")).
+				Return(errors.Forbidden("You do not have permission to delete this comment"))
+
+			req := httptest.NewRequest(http.MethodDelete, "/comments/comment-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusForbidden))
 		})
 	})
 })

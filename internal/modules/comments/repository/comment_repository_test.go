@@ -3,6 +3,7 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -56,6 +57,41 @@ var _ = Describe("CommentRepository", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(comment.CreatedAt).To(Equal(now))
 			Expect(comment.UpdatedAt).To(Equal(now))
+		})
+
+		It("should return nil when insert returns no rows", func() {
+			comment := &models.Comment{
+				ID:       "comment-2",
+				PostID:   "post-1",
+				AuthorID: "author-1",
+				Content:  "No row content",
+			}
+
+			rows := sqlmock.NewRows([]string{"created_at", "updated_at"})
+
+			mock.ExpectQuery(`INSERT INTO comments \(id, post_id, author_id, content\) VALUES \(\$1, \$2, \$3, \$4\) RETURNING created_at, updated_at`).
+				WithArgs(comment.ID, comment.PostID, comment.AuthorID, comment.Content).
+				WillReturnRows(rows)
+
+			err := repo.Create(ctx, comment)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should return error when insert fails", func() {
+			comment := &models.Comment{
+				ID:       "comment-3",
+				PostID:   "post-1",
+				AuthorID: "author-1",
+				Content:  "Error content",
+			}
+
+			mock.ExpectQuery(`INSERT INTO comments \(id, post_id, author_id, content\) VALUES \(\$1, \$2, \$3, \$4\) RETURNING created_at, updated_at`).
+				WithArgs(comment.ID, comment.PostID, comment.AuthorID, comment.Content).
+				WillReturnError(errors.New("insert failed"))
+
+			err := repo.Create(ctx, comment)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("insert failed"))
 		})
 	})
 

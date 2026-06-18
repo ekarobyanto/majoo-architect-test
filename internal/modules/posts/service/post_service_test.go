@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -52,6 +53,10 @@ type mockTransactor struct {
 }
 
 func (m *mockTransactor) WithinTransaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	args := m.Called(ctx)
+	if args.Get(0) != nil {
+		return args.Error(0)
+	}
 	return fn(ctx)
 }
 
@@ -74,6 +79,50 @@ func TestPostService_Create(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
+func TestPostService_Create_RepoError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	req := domain.CreatePostRequest{Title: "Title", Content: "Content"}
+
+	repo.On("Create", ctx, mock.AnythingOfType("*models.Post")).Return(errors.New("insert failed"))
+
+	post, err := svc.Create(ctx, "author-1", req)
+	assert.Error(t, err)
+	assert.Nil(t, post)
+	assert.Contains(t, err.Error(), "Failed to create post")
+}
+
+func TestPostService_GetByID_NotFound(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	repo.On("GetByID", ctx, "post-1").Return(nil, nil)
+
+	post, err := svc.GetByID(ctx, "post-1")
+	assert.Error(t, err)
+	assert.Nil(t, post)
+	assert.Contains(t, err.Error(), "Post not found")
+}
+
+func TestPostService_GetByID_RepoError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	repo.On("GetByID", ctx, "post-1").Return(nil, errors.New("db error"))
+
+	post, err := svc.GetByID(ctx, "post-1")
+	assert.Error(t, err)
+	assert.Nil(t, post)
+	assert.Contains(t, err.Error(), "Failed to fetch post")
+}
+
 func TestPostService_Update_Success(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
@@ -91,6 +140,43 @@ func TestPostService_Update_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Updated Title", post.Title)
 	repo.AssertExpectations(t)
+}
+
+func TestPostService_Update_ContentOnly(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "author-1", Roles: []string{"user"}}
+	req := domain.UpdatePostRequest{Content: "Updated Content"}
+
+	existingPost := &models.Post{ID: "post-1", AuthorID: "author-1", Title: "T", Content: "C"}
+	repo.On("GetByID", ctx, "post-1").Return(existingPost, nil)
+	repo.On("Update", ctx, existingPost).Return(nil)
+
+	post, err := svc.Update(ctx, "post-1", user, req)
+	assert.NoError(t, err)
+	assert.Equal(t, "Updated Content", post.Content)
+}
+
+func TestPostService_Update_RepoUpdateError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "author-1", Roles: []string{"user"}}
+	req := domain.UpdatePostRequest{Title: "Updated Title"}
+
+	existingPost := &models.Post{ID: "post-1", AuthorID: "author-1"}
+	repo.On("GetByID", ctx, "post-1").Return(existingPost, nil)
+	repo.On("Update", ctx, existingPost).Return(errors.New("update failed"))
+
+	post, err := svc.Update(ctx, "post-1", user, req)
+	assert.Error(t, err)
+	assert.Nil(t, post)
+	assert.Contains(t, err.Error(), "Failed to update post")
 }
 
 func TestPostService_Update_Forbidden(t *testing.T) {
@@ -122,11 +208,77 @@ func TestPostService_Delete_Success(t *testing.T) {
 
 	existingPost := &models.Post{ID: "post-1", AuthorID: "author-1"}
 	repo.On("GetByID", ctx, "post-1").Return(existingPost, nil)
+	tx.On("WithinTransaction", ctx).Return(nil)
 	repo.On("Delete", ctx, "post-1").Return(nil)
 
 	err := svc.Delete(ctx, "post-1", user)
 	assert.NoError(t, err)
 	repo.AssertExpectations(t)
+	tx.AssertExpectations(t)
+}
+
+func TestPostService_Delete_GetByIDError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
+	repo.On("GetByID", ctx, "post-1").Return(nil, errors.New("db error"))
+
+	err := svc.Delete(ctx, "post-1", user)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to fetch post")
+}
+
+func TestPostService_Delete_RepoDeleteError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
+
+	existingPost := &models.Post{ID: "post-1", AuthorID: "author-1"}
+	repo.On("GetByID", ctx, "post-1").Return(existingPost, nil)
+	tx.On("WithinTransaction", ctx).Return(nil)
+	repo.On("Delete", ctx, "post-1").Return(errors.New("delete failed"))
+
+	err := svc.Delete(ctx, "post-1", user)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "Failed to delete post")
+}
+
+func TestPostService_Delete_TransactionStartError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
+
+	existingPost := &models.Post{ID: "post-1", AuthorID: "author-1"}
+	repo.On("GetByID", ctx, "post-1").Return(existingPost, nil)
+	tx.On("WithinTransaction", ctx).Return(errors.New("tx failed"))
+
+	err := svc.Delete(ctx, "post-1", user)
+	assert.Error(t, err)
+	assert.Equal(t, "tx failed", err.Error())
+}
+
+func TestPostService_GetPaginated_DefaultValuesAndError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	svc := service.NewPostService(repo, tx)
+
+	ctx := context.Background()
+	query := domain.PaginationQuery{Page: 0, Limit: 101}
+	repo.On("GetPaginated", ctx, 1, 10).Return(nil, int64(0), errors.New("db error"))
+
+	resp, err := svc.GetPaginated(ctx, query)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "Failed to fetch posts")
 }
 
 func TestPostService_GetPaginated(t *testing.T) {

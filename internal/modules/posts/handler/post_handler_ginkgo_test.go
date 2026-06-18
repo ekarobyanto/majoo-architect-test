@@ -83,6 +83,10 @@ var _ = Describe("PostHandler", func() {
 		})
 
 		app.Post("/posts", h.Create)
+		app.Get("/posts/:id", h.GetByID)
+		app.Get("/posts", h.GetPaginated)
+		app.Put("/posts/:id", h.Update)
+		app.Delete("/posts/:id", h.Delete)
 	})
 
 	Describe("Create", func() {
@@ -104,7 +108,7 @@ var _ = Describe("PostHandler", func() {
 				jsonBody, _ := json.Marshal(reqBody)
 				req := httptest.NewRequest(http.MethodPost, "/posts", strings.NewReader(string(jsonBody)))
 				req.Header.Set("Content-Type", "application/json")
-				
+
 				resp, err := app.Test(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusCreated))
@@ -115,7 +119,7 @@ var _ = Describe("PostHandler", func() {
 				}
 				body, _ := io.ReadAll(resp.Body)
 				json.Unmarshal(body, &fullResp)
-				
+
 				Expect(fullResp.Success).To(BeTrue())
 				Expect(fullResp.Data.Title).To(Equal("New Post"))
 				mockSvc.AssertExpectations(GinkgoT())
@@ -132,6 +136,138 @@ var _ = Describe("PostHandler", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusUnprocessableEntity))
 			})
+		})
+
+		Context("when service returns an error", func() {
+			It("should return mapped error status", func() {
+				reqBody := domain.CreatePostRequest{Title: "New Post", Content: "Content"}
+				mockSvc.On("Create", mock.Anything, "user-1", reqBody).Return(nil, errors.Internal("Failed to create post"))
+
+				jsonBody, _ := json.Marshal(reqBody)
+				req := httptest.NewRequest(http.MethodPost, "/posts", strings.NewReader(string(jsonBody)))
+				req.Header.Set("Content-Type", "application/json")
+
+				resp, err := app.Test(req)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
+			})
+		})
+	})
+
+	Describe("GetByID", func() {
+		It("should return 200 OK", func() {
+			expected := &models.Post{ID: "post-1", Title: "Title", Content: "Body"}
+			mockSvc.On("GetByID", mock.Anything, "post-1").Return(expected, nil)
+
+			req := httptest.NewRequest(http.MethodGet, "/posts/post-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			mockSvc.On("GetByID", mock.Anything, "post-1").Return(nil, errors.NotFound("Post not found"))
+
+			req := httptest.NewRequest(http.MethodGet, "/posts/post-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
+		})
+	})
+
+	Describe("GetPaginated", func() {
+		It("should return 200 OK with paginated posts", func() {
+			expected := &domain.PaginatedPostResponse{
+				Data:       []models.Post{{ID: "post-1"}},
+				Total:      1,
+				Page:       1,
+				Limit:      10,
+				TotalPages: 1,
+			}
+
+			mockSvc.On("GetPaginated", mock.Anything, domain.PaginationQuery{Page: 1, Limit: 10}).Return(expected, nil)
+
+			req := httptest.NewRequest(http.MethodGet, "/posts?page=1&limit=10", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return 400 for invalid query parameters", func() {
+			req := httptest.NewRequest(http.MethodGet, "/posts?page=abc&limit=10", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			mockSvc.On("GetPaginated", mock.Anything, domain.PaginationQuery{Page: 1, Limit: 10}).
+				Return(nil, errors.Internal("Failed to fetch posts"))
+
+			req := httptest.NewRequest(http.MethodGet, "/posts?page=1&limit=10", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusInternalServerError))
+		})
+	})
+
+	Describe("Update", func() {
+		It("should return 200 OK", func() {
+			reqBody := domain.UpdatePostRequest{Title: "Updated title", Content: "Updated content"}
+			mockSvc.On("Update", mock.Anything, "post-1", mock.AnythingOfType("*domain.UserContext"), reqBody).
+				Return(&models.Post{ID: "post-1", Title: reqBody.Title, Content: reqBody.Content}, nil)
+
+			jsonBody, _ := json.Marshal(reqBody)
+			req := httptest.NewRequest(http.MethodPut, "/posts/post-1", strings.NewReader(string(jsonBody)))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return 400 on invalid JSON body", func() {
+			req := httptest.NewRequest(http.MethodPut, "/posts/post-1", strings.NewReader("{"))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusBadRequest))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			reqBody := domain.UpdatePostRequest{Title: "Updated title", Content: "Updated content"}
+			mockSvc.On("Update", mock.Anything, "post-1", mock.AnythingOfType("*domain.UserContext"), reqBody).
+				Return(nil, errors.Forbidden("You do not have permission to update this post"))
+
+			jsonBody, _ := json.Marshal(reqBody)
+			req := httptest.NewRequest(http.MethodPut, "/posts/post-1", strings.NewReader(string(jsonBody)))
+			req.Header.Set("Content-Type", "application/json")
+
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusForbidden))
+		})
+	})
+
+	Describe("Delete", func() {
+		It("should return 200 OK", func() {
+			mockSvc.On("Delete", mock.Anything, "post-1", mock.AnythingOfType("*domain.UserContext")).Return(nil)
+
+			req := httptest.NewRequest(http.MethodDelete, "/posts/post-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+		It("should return mapped error status when service fails", func() {
+			mockSvc.On("Delete", mock.Anything, "post-1", mock.AnythingOfType("*domain.UserContext")).
+				Return(errors.Forbidden("You do not have permission to delete this post"))
+
+			req := httptest.NewRequest(http.MethodDelete, "/posts/post-1", nil)
+			resp, err := app.Test(req)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resp.StatusCode).To(Equal(http.StatusForbidden))
 		})
 	})
 })

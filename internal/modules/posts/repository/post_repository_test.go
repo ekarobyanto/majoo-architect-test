@@ -3,6 +3,7 @@ package repository_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -56,6 +57,41 @@ var _ = Describe("PostRepository", func() {
 			Expect(post.CreatedAt).To(Equal(now))
 			Expect(post.UpdatedAt).To(Equal(now))
 		})
+
+		It("should return nil when insert returns no rows", func() {
+			post := &models.Post{
+				ID:       "post-2",
+				AuthorID: "author-1",
+				Title:    "No Row Title",
+				Content:  "No Row Content",
+			}
+
+			rows := sqlmock.NewRows([]string{"created_at", "updated_at"})
+
+			mock.ExpectQuery(`INSERT INTO posts \(id, author_id, title, content\) VALUES \(\$1, \$2, \$3, \$4\) RETURNING created_at, updated_at`).
+				WithArgs(post.ID, post.AuthorID, post.Title, post.Content).
+				WillReturnRows(rows)
+
+			err := repo.Create(ctx, post)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should return error when insert fails", func() {
+			post := &models.Post{
+				ID:       "post-3",
+				AuthorID: "author-1",
+				Title:    "Error Title",
+				Content:  "Error Content",
+			}
+
+			mock.ExpectQuery(`INSERT INTO posts \(id, author_id, title, content\) VALUES \(\$1, \$2, \$3, \$4\) RETURNING created_at, updated_at`).
+				WithArgs(post.ID, post.AuthorID, post.Title, post.Content).
+				WillReturnError(errors.New("insert failed"))
+
+			err := repo.Create(ctx, post)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("insert failed"))
+		})
 	})
 
 	Describe("GetByID", func() {
@@ -106,6 +142,17 @@ var _ = Describe("PostRepository", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(total).To(Equal(int64(2)))
 			Expect(posts).To(HaveLen(2))
+		})
+
+		It("should return error when count query fails", func() {
+			mock.ExpectQuery(`SELECT COUNT\(\*\) FROM posts`).
+				WillReturnError(errors.New("count failed"))
+
+			posts, total, err := repo.GetPaginated(ctx, 1, 10)
+			Expect(err).To(HaveOccurred())
+			Expect(posts).To(BeNil())
+			Expect(total).To(Equal(int64(0)))
+			Expect(err.Error()).To(ContainSubstring("count failed"))
 		})
 	})
 
