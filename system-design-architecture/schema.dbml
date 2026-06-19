@@ -1,0 +1,148 @@
+// Comprehensive E-commerce Schema
+
+Table users {
+  id uuid [pk]
+  email varchar [unique, not null]
+  password_hash text [not null]
+  full_name varchar
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+
+Table categories {
+  id uuid [pk]
+  name varchar [not null]
+  created_at timestamp
+}
+
+Table products {
+  id uuid [pk]
+  category_id uuid
+  sku varchar [unique]
+  name varchar [not null]
+  description text
+  price numeric
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table product_images {
+  id uuid [pk]
+  product_id uuid [not null]
+  image_url text [not null]
+  display_order integer
+  created_at timestamp
+}
+
+Table inventories {
+  product_id uuid [pk]
+  available_quantity integer [default: 0]
+  reserved_quantity integer [default: 0]
+  updated_at timestamp
+}
+
+Table inventory_reservations {
+  id uuid [pk]
+  order_id uuid
+  product_id uuid
+  quantity integer
+  status varchar
+  expires_at timestamp
+  created_at timestamp
+}
+
+Table orders {
+  id uuid [pk]
+  order_number varchar [unique]
+  user_id uuid
+  total_amount numeric
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table order_items {
+  id uuid [pk]
+  order_id uuid [not null]
+  product_id uuid
+  product_name varchar
+  unit_price numeric
+  quantity integer
+  subtotal numeric
+}
+
+Table order_status_histories {
+  id uuid [pk]
+  order_id uuid [not null]
+  status varchar
+  notes text
+  created_at timestamp
+}
+
+Table payment_gateways {
+  id uuid [pk]
+  code varchar [unique]
+  name varchar
+  is_active boolean [default: true]
+}
+
+Table payments {
+  id uuid [pk]
+  order_id uuid
+  gateway_id uuid
+  external_reference varchar
+  amount numeric
+  status varchar
+  paid_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table payment_callbacks {
+  id uuid [pk]
+  payment_id uuid [not null]
+  payload jsonb
+  created_at timestamp
+}
+
+Table notifications {
+  id uuid [pk]
+  user_id uuid
+  type varchar
+  recipient varchar
+  status varchar
+  created_at timestamp
+}
+
+Table shipments {
+  id uuid [pk]
+  order_id uuid
+  tracking_number varchar
+  provider varchar
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table shipment_events {
+  id uuid [pk]
+  shipment_id uuid [not null]
+  status varchar
+  description text
+  occurred_at timestamp
+  created_at timestamp
+}
+
+// Relationships
+Ref: products.category_id > categories.id
+Ref: product_images.product_id > products.id
+Ref: order_items.order_id > orders.id
+Ref: order_status_histories.order_id > orders.id
+Ref: payments.gateway_id > payment_gateways.id
+Ref: payment_callbacks.payment_id > payments.id
+Ref: shipment_events.shipment_id > shipments.id
