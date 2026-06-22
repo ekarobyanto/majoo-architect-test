@@ -57,12 +57,12 @@ func (h *PostHandler) Create(c *fiber.Ctx) error {
 // @Tags Posts
 // @Produce json
 // @Param id path string true "Post ID"
-// @Success 200 {object} response.Response{data=models.Post}
+// @Success 200 {object} response.Response{data=domain.PostDetailResponse}
 // @Failure 404 {object} errors.ErrorResponse
 // @Router /posts/{id} [get]
 func (h *PostHandler) GetByID(c *fiber.Ctx) error {
 	id := c.Params("id")
-	post, err := h.svc.GetByID(c.Context(), id)
+	post, err := h.svc.GetDetailByID(c.Context(), id)
 	if err != nil {
 		return err
 	}

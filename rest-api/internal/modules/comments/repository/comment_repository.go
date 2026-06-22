@@ -42,6 +42,13 @@ func (r *commentRepository) GetByID(ctx context.Context, id string) (*models.Com
 	return &comment, err
 }
 
+func (r *commentRepository) GetByPostID(ctx context.Context, postID string) ([]models.Comment, error) {
+	var comments []models.Comment
+	query := `SELECT id, post_id, author_id, content, created_at, updated_at FROM comments WHERE post_id = $1 ORDER BY created_at ASC`
+	err := sqlx.SelectContext(ctx, database.GetQueryer(ctx, r.db), &comments, query, postID)
+	return comments, err
+}
+
 func (r *commentRepository) Update(ctx context.Context, comment *models.Comment) error {
 	query := `UPDATE comments SET content = :content, updated_at = :updated_at WHERE id = :id`
 	comment.UpdatedAt = time.Now()

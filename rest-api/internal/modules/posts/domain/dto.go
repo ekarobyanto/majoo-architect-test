@@ -2,6 +2,7 @@ package domain
 
 import (
 	"time"
+
 	"github.com/user/simple-blog/models"
 )
 
@@ -35,4 +36,9 @@ type PaginatedPostResponse struct {
 	Page       int           `json:"page"`
 	Limit      int           `json:"limit"`
 	TotalPages int           `json:"total_pages"`
+}
+
+type PostDetailResponse struct {
+	models.Post
+	Comments []models.Comment `json:"comments"`
 }

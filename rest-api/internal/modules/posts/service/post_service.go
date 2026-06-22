@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/user/simple-blog/internal/modules/auth/authorization"
 	authDomain "github.com/user/simple-blog/internal/modules/auth/domain"
+	commentDomain "github.com/user/simple-blog/internal/modules/comments/domain"
 	"github.com/user/simple-blog/internal/modules/posts/domain"
 	"github.com/user/simple-blog/internal/platform/database"
 	"github.com/user/simple-blog/internal/platform/errors"
@@ -14,12 +15,13 @@ import (
 )
 
 type postService struct {
-	repo domain.PostRepository
-	tx   database.Transactor
+	repo        domain.PostRepository
+	tx          database.Transactor
+	commentRepo commentDomain.CommentRepository
 }
 
-func NewPostService(repo domain.PostRepository, tx database.Transactor) domain.PostService {
-	return &postService{repo: repo, tx: tx}
+func NewPostService(repo domain.PostRepository, tx database.Transactor, commentRepo commentDomain.CommentRepository) domain.PostService {
+	return &postService{repo: repo, tx: tx, commentRepo: commentRepo}
 }
 
 func (s *postService) Create(ctx context.Context, authorID string, req domain.CreatePostRequest) (*models.Post, error) {
@@ -46,6 +48,23 @@ func (s *postService) GetByID(ctx context.Context, id string) (*models.Post, err
 	return post, nil
 }
 
+func (s *postService) GetDetailByID(ctx context.Context, id string) (*domain.PostDetailResponse, error) {
+	post, err := s.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	comments, err := s.commentRepo.GetByPostID(ctx, id)
+	if err != nil {
+		return nil, errors.Internal("Failed to fetch post comments")
+	}
+
+	return &domain.PostDetailResponse{
+		Post:     *post,
+		Comments: comments,
+	}, nil
+}
+
 func (s *postService) GetPaginated(ctx context.Context, query domain.PaginationQuery) (*domain.PaginatedPostResponse, error) {
 	page := query.Page
 	if page < 1 {
@@ -55,7 +74,6 @@ func (s *postService) GetPaginated(ctx context.Context, query domain.PaginationQ
 	if limit < 1 || limit > 100 {
 		limit = 10
 	}
-
 	posts, total, err := s.repo.GetPaginated(ctx, page, limit)
 	if err != nil {
 		return nil, errors.Internal("Failed to fetch posts")

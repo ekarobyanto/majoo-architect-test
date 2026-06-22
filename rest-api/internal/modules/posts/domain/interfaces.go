@@ -18,6 +18,7 @@ type PostRepository interface {
 type PostService interface {
 	Create(ctx context.Context, authorID string, req CreatePostRequest) (*models.Post, error)
 	GetByID(ctx context.Context, id string) (*models.Post, error)
+	GetDetailByID(ctx context.Context, id string) (*PostDetailResponse, error)
 	GetPaginated(ctx context.Context, query PaginationQuery) (*PaginatedPostResponse, error)
 	Update(ctx context.Context, id string, user *authDomain.UserContext, req UpdatePostRequest) (*models.Post, error)
 	Delete(ctx context.Context, id string, user *authDomain.UserContext) error

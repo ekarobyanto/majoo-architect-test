@@ -10,6 +10,7 @@ import (
 type CommentRepository interface {
 	Create(ctx context.Context, comment *models.Comment) error
 	GetByID(ctx context.Context, id string) (*models.Comment, error)
+	GetByPostID(ctx context.Context, postID string) ([]models.Comment, error)
 	Update(ctx context.Context, comment *models.Comment) error
 	Delete(ctx context.Context, id string) error
 }

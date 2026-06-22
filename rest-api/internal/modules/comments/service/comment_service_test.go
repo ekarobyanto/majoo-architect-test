@@ -31,6 +31,14 @@ func (m *mockCommentRepository) GetByID(ctx context.Context, id string) (*models
 	return args.Get(0).(*models.Comment), args.Error(1)
 }
 
+func (m *mockCommentRepository) GetByPostID(ctx context.Context, postID string) ([]models.Comment, error) {
+	args := m.Called(ctx, postID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]models.Comment), args.Error(1)
+}
+
 func (m *mockCommentRepository) Update(ctx context.Context, comment *models.Comment) error {
 	args := m.Called(ctx, comment)
 	return args.Error(0)
@@ -56,6 +64,14 @@ func (m *mockPostService) GetByID(ctx context.Context, id string) (*models.Post,
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*models.Post), args.Error(1)
+}
+
+func (m *mockPostService) GetDetailByID(ctx context.Context, id string) (*postsDomain.PostDetailResponse, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*postsDomain.PostDetailResponse), args.Error(1)
 }
 
 func (m *mockPostService) GetPaginated(ctx context.Context, query postsDomain.PaginationQuery) (*postsDomain.PaginatedPostResponse, error) {

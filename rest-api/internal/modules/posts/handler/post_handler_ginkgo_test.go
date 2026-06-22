@@ -39,6 +39,14 @@ func (m *mockPostService) GetByID(ctx context.Context, id string) (*models.Post,
 	return args.Get(0).(*models.Post), args.Error(1)
 }
 
+func (m *mockPostService) GetDetailByID(ctx context.Context, id string) (*domain.PostDetailResponse, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.PostDetailResponse), args.Error(1)
+}
+
 func (m *mockPostService) GetPaginated(ctx context.Context, query domain.PaginationQuery) (*domain.PaginatedPostResponse, error) {
 	args := m.Called(ctx, query)
 	if args.Get(0) == nil {
@@ -156,8 +164,8 @@ var _ = Describe("PostHandler", func() {
 
 	Describe("GetByID", func() {
 		It("should return 200 OK", func() {
-			expected := &models.Post{ID: "post-1", Title: "Title", Content: "Body"}
-			mockSvc.On("GetByID", mock.Anything, "post-1").Return(expected, nil)
+			expected := &domain.PostDetailResponse{Post: models.Post{ID: "post-1", Title: "Title", Content: "Body"}}
+			mockSvc.On("GetDetailByID", mock.Anything, "post-1").Return(expected, nil)
 
 			req := httptest.NewRequest(http.MethodGet, "/posts/post-1", nil)
 			resp, err := app.Test(req)
@@ -166,7 +174,7 @@ var _ = Describe("PostHandler", func() {
 		})
 
 		It("should return mapped error status when service fails", func() {
-			mockSvc.On("GetByID", mock.Anything, "post-1").Return(nil, errors.NotFound("Post not found"))
+			mockSvc.On("GetDetailByID", mock.Anything, "post-1").Return(nil, errors.NotFound("Post not found"))
 
 			req := httptest.NewRequest(http.MethodGet, "/posts/post-1", nil)
 			resp, err := app.Test(req)

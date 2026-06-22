@@ -17,6 +17,41 @@ type mockPostRepository struct {
 	mock.Mock
 }
 
+type mockCommentRepository struct {
+	mock.Mock
+}
+
+func (m *mockCommentRepository) Create(ctx context.Context, comment *models.Comment) error {
+	args := m.Called(ctx, comment)
+	return args.Error(0)
+}
+
+func (m *mockCommentRepository) GetByID(ctx context.Context, id string) (*models.Comment, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Comment), args.Error(1)
+}
+
+func (m *mockCommentRepository) GetByPostID(ctx context.Context, postID string) ([]models.Comment, error) {
+	args := m.Called(ctx, postID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]models.Comment), args.Error(1)
+}
+
+func (m *mockCommentRepository) Update(ctx context.Context, comment *models.Comment) error {
+	args := m.Called(ctx, comment)
+	return args.Error(0)
+}
+
+func (m *mockCommentRepository) Delete(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
+}
+
 func (m *mockPostRepository) Create(ctx context.Context, post *models.Post) error {
 	args := m.Called(ctx, post)
 	return args.Error(0)
@@ -63,7 +98,8 @@ func (m *mockTransactor) WithinTransaction(ctx context.Context, fn func(ctx cont
 func TestPostService_Create(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	authorID := "author-1"
@@ -82,7 +118,8 @@ func TestPostService_Create(t *testing.T) {
 func TestPostService_Create_RepoError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	req := domain.CreatePostRequest{Title: "Title", Content: "Content"}
@@ -98,7 +135,8 @@ func TestPostService_Create_RepoError(t *testing.T) {
 func TestPostService_GetByID_NotFound(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	repo.On("GetByID", ctx, "post-1").Return(nil, nil)
@@ -112,7 +150,8 @@ func TestPostService_GetByID_NotFound(t *testing.T) {
 func TestPostService_GetByID_RepoError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	repo.On("GetByID", ctx, "post-1").Return(nil, errors.New("db error"))
@@ -126,7 +165,8 @@ func TestPostService_GetByID_RepoError(t *testing.T) {
 func TestPostService_Update_Success(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "author-1", Roles: []string{"user"}}
@@ -145,7 +185,8 @@ func TestPostService_Update_Success(t *testing.T) {
 func TestPostService_Update_ContentOnly(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "author-1", Roles: []string{"user"}}
@@ -163,7 +204,8 @@ func TestPostService_Update_ContentOnly(t *testing.T) {
 func TestPostService_Update_RepoUpdateError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "author-1", Roles: []string{"user"}}
@@ -182,7 +224,8 @@ func TestPostService_Update_RepoUpdateError(t *testing.T) {
 func TestPostService_Update_Forbidden(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "other-user", Roles: []string{"user"}}
@@ -201,7 +244,8 @@ func TestPostService_Update_Forbidden(t *testing.T) {
 func TestPostService_Delete_Success(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
@@ -220,7 +264,8 @@ func TestPostService_Delete_Success(t *testing.T) {
 func TestPostService_Delete_GetByIDError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
@@ -234,7 +279,8 @@ func TestPostService_Delete_GetByIDError(t *testing.T) {
 func TestPostService_Delete_RepoDeleteError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
@@ -252,7 +298,8 @@ func TestPostService_Delete_RepoDeleteError(t *testing.T) {
 func TestPostService_Delete_TransactionStartError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	user := &authDomain.UserContext{ID: "admin-1", Roles: []string{"admin"}}
@@ -269,7 +316,8 @@ func TestPostService_Delete_TransactionStartError(t *testing.T) {
 func TestPostService_GetPaginated_DefaultValuesAndError(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	query := domain.PaginationQuery{Page: 0, Limit: 101}
@@ -284,7 +332,8 @@ func TestPostService_GetPaginated_DefaultValuesAndError(t *testing.T) {
 func TestPostService_GetPaginated(t *testing.T) {
 	repo := new(mockPostRepository)
 	tx := new(mockTransactor)
-	svc := service.NewPostService(repo, tx)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
 
 	ctx := context.Background()
 	query := domain.PaginationQuery{Page: 1, Limit: 10}
@@ -297,4 +346,44 @@ func TestPostService_GetPaginated(t *testing.T) {
 	assert.Equal(t, int64(20), resp.Total)
 	assert.Equal(t, 2, resp.TotalPages)
 	repo.AssertExpectations(t)
+}
+
+func TestPostService_GetDetailByID(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
+
+	ctx := context.Background()
+	post := &models.Post{ID: "post-1", Title: "Title", Content: "Content"}
+	comments := []models.Comment{{ID: "c1", PostID: "post-1", Content: "Nice"}}
+
+	repo.On("GetByID", ctx, "post-1").Return(post, nil)
+	commentRepo.On("GetByPostID", ctx, "post-1").Return(comments, nil)
+
+	resp, err := svc.GetDetailByID(ctx, "post-1")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, post.ID, resp.ID)
+	assert.Len(t, resp.Comments, 1)
+	repo.AssertExpectations(t)
+	commentRepo.AssertExpectations(t)
+}
+
+func TestPostService_GetDetailByID_CommentRepoError(t *testing.T) {
+	repo := new(mockPostRepository)
+	tx := new(mockTransactor)
+	commentRepo := new(mockCommentRepository)
+	svc := service.NewPostService(repo, tx, commentRepo)
+
+	ctx := context.Background()
+	post := &models.Post{ID: "post-1", Title: "Title", Content: "Content"}
+
+	repo.On("GetByID", ctx, "post-1").Return(post, nil)
+	commentRepo.On("GetByPostID", ctx, "post-1").Return(nil, errors.New("db error"))
+
+	resp, err := svc.GetDetailByID(ctx, "post-1")
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "Failed to fetch post comments")
 }

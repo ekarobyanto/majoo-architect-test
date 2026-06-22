@@ -92,6 +92,25 @@ definitions:
       total_pages:
         type: integer
     type: object
+  github_com_user_simple-blog_internal_modules_posts_domain.PostDetailResponse:
+    properties:
+      author_id:
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/models.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   github_com_user_simple-blog_internal_modules_posts_domain.UpdatePostRequest:
     properties:
       content:
@@ -466,7 +485,7 @@ paths:
             - $ref: '#/definitions/github_com_user_simple-blog_internal_platform_response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.Post'
+                  $ref: '#/definitions/github_com_user_simple-blog_internal_modules_posts_domain.PostDetailResponse'
               type: object
         "404":
           description: Not Found
